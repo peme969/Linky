@@ -1,8 +1,6 @@
 export default {
 	async fetch(request, env) {
 	  const { pathname } = new URL(request.url);
-  
-	  // Return "Hello, World!" for the root URL (no pathname or slug)
 	  if (pathname === '/') {
 		return new Response('Hello, World!', {
 		  headers: { 'Content-Type': 'text/plain' },
@@ -10,11 +8,8 @@ export default {
 	  }
   
 	  if (pathname.startsWith('/api')) {
-		// Fetch API key from environment variable
 		const storedSecret = env.API_KEY;
 		const authHeader = request.headers.get('Authorization');
-  
-		// Check if authorization matches the stored secret
 		if (!storedSecret || !authHeader || authHeader !== `Bearer ${storedSecret}`) {
 		  return new Response('Unauthorized', { status: 401 });
 		}
@@ -32,13 +27,10 @@ export default {
 		  return new Response('API route not found', { status: 404 });
 		}
 	  }
-  
-	  // Handle redirect
 	  return handleRedirect(pathname, request, env);
 	},
   };
   
-  // Handle create API endpoint
   async function handleCreate(request, env) {
 	const { slug, url, password, expiresAt } = await request.json();
 	const generatedSlug = slug || generateSlug();
@@ -55,14 +47,12 @@ export default {
 	});
   }
   
-  // Handle delete API endpoint
   async function handleDelete(request, env) {
 	const { slug } = await request.json();
 	await env.URLS.delete(slug);
 	return new Response(`Deleted slug: ${slug}`);
   }
   
-  // Handle view all links
   async function handleViewAll(env) {
 	const allKeys = await getAllKeys(env.URLS);
 	const allData = [];
@@ -77,7 +67,6 @@ export default {
 	});
   }
   
-  // Handle view a specific slug
   async function handleViewSlug(slug, env) {
 	const data = await env.URLS.get(slug);
 	if (!data) {
@@ -89,7 +78,7 @@ export default {
   }
   
   async function handleRedirect(pathname, request, env) {
-	const slug = pathname.slice(1); // Extract the slug from the URL
+	const slug = pathname.slice(1); 
 	const data = await env.URLS.get(slug);
   
 	if (!data) {
@@ -98,29 +87,26 @@ export default {
   
 	const { url, password, expiresAt } = JSON.parse(data);
   
-	// Check if the slug is expired (only if expiresAt is not null)
 	if (expiresAt && Date.now() > expiresAt) {
-	  await env.URLS.delete(slug); // Delete the expired slug
+	  await env.URLS.delete(slug); 
 	  return new Response('URL expired and has been deleted.', { status: 410 });
 	}
   
 	const authHeader = request.headers.get('Authorization');
 	if (password) {
 	  if (authHeader === `Bearer ${password}`) {
-		return Response.redirect(url, 302); // Redirect if password matches
+		return Response.redirect(url, 302); 
 	  }
   
-	  // Render an HTML page to prompt the user for the password
 	  return new Response(renderPasswordPrompt(slug), {
 		headers: { 'Content-Type': 'text/html' },
 	  });
 	}
   
-	return Response.redirect(url, 302); // Redirect if no password is required
+	return Response.redirect(url, 302); 
   }
   
   
-  // Helper to render the password prompt HTML
   function renderPasswordPrompt(slug) {
 	return `
 	  <!DOCTYPE html>
@@ -151,13 +137,11 @@ export default {
 	`;
   }
   
-  // Generate random slug
   function generateSlug(length = 6) {
 	const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 	return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
   }
   
-  // Helper to get all keys from KV
   async function getAllKeys(kvNamespace) {
 	let cursor = null;
 	const allKeys = [];
