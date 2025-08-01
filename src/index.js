@@ -8,7 +8,8 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     const method = request.method;
-    const KV = env.LinkKV;
+    const KV = env.URLS;
+
     const API_SECRET = env.API_KEY;
     const cors = getCORSHeaders();
 
