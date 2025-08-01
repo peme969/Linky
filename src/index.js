@@ -1,6 +1,6 @@
 import html from './index.html';
 import docsHtml from './docs.html';
-import styleCss from './style.css';
+import styleCss from './style.txt';
 import { DateTime } from 'luxon';
 
 export default {
