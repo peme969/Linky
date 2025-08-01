@@ -1,16 +1,20 @@
+
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "url-shortener",
+  "name": "pastebin",
   "main": "src/index.js",
   "compatibility_date": "2025-01-24",
   "observability": {
     "enabled": true
   },
+  "route": {
+    "pattern": "paste.peme969.dev/*",
+    "zone_name": "peme969.dev"
+  },
   "kv_namespaces": [
     {
-      "binding": "URLS",
-      "id": "66b8e1c0d3954f07a5c1c90a371f5c21"
+      "binding": "Pastebin",
+      "id": "7511b61ec1a8423bb1903a4960ac7308"
     }
   ]
-
 }
