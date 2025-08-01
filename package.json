@@ -1,5 +1,5 @@
 {
-  "name": "pastebin",
+  "name": "url-shortener",
   "version": "0.0.0",
   "private": true,
   "scripts": {

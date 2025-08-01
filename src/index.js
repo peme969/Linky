@@ -1,6 +1,5 @@
 import html from './index.html';
 import docsHtml from './docs.html';
-import apiDocs from './api-docs.txt';
 import styleCss from './style.css';
 import { DateTime } from 'luxon';
 
