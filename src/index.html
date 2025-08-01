@@ -26,27 +26,27 @@
   <div class="container">
     <div class="navbar"></div>
     <form class="create-form">
-      <input id="secret-input" type="text" placeholder="API Key" />
-      <input id="url-input" type="url" placeholder="URL to shorten" required />
-      <input id="slug-input" type="text" placeholder="Custom alias (optional)" />
-      <input id="expiration-input" type="text" placeholder="YYYY-MM-DD hh:mm AM/PM (optional)" />
+      <input id="secret-input"      type="text"     placeholder="API Key" required />
+      <input id="url-input"         type="url"      placeholder="URL to shorten" required />
+      <input id="password-input"    type="password" placeholder="Link Password (optional)" />
+      <input id="slug-input"        type="text"     placeholder="Custom alias (optional)" />
+      <input id="expiration-input" type="text"     placeholder="YYYY-MM-DD hh:mm AM/PM (optional)" />
       <input type="submit" id="create" value="Shorten URL" />
+      <button type="button" id="list">List My Links</button>
     </form>
     <div class="result-container">
       <h3 id="had">API Response:</h3>
-      <p id="result">Submit the form to shorten a URL...</p>
+      <p id="result">Submit the form to shorten a URL or list your links...</p>
+    </div>
+    <div class="list-container" hidden>
+      <h3>Your Links</h3>
+      <ul id="links-list"></ul>
     </div>
   </div>
   <div class="check">
-    <label for="toggle" class="keyer">
-      <svg id="key" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-        <path fill="currentColor" d="M11 18Zm-7 2q-.425 0-.713-.288T3 19v-1.8q0-.85.438-1.563T4.6 14.55q1.55-.775 3.15-1.163T11 13q.5 0 1 .038t1 .112q-.05.525.025 1.05t.25 1.025q-.575-.125-1.137-.175T11 15q-1.4 0-2.775.338T5.5 16.35q-.225.125-.363.35T5 17.2v.8h10.5v2H4Zm14.65 2.65l-.85-.85q-.15-.15-.225-.338t-.075-.387V16.85q-1.1-.325-1.8-1.238T15 13.5q0-1.45 1.025-2.475T18.5 10q1.45 0 2.475 1.025T22 13.5q0 1.125-.638 2t-1.612 1.25l.9.9q.15.15.15.35t-.15.35l-.8.8q-.15.15-.15.35t.15.35l.8.8q.15.15.15.35t-.15.35l-1.3 1.3q-.15.15-.35.15t-.35-.15ZM18.5 14q.425 0 .713-.288T19.5 13q0-.425-.288-.713T18.5 12q-.425 0-.713.288T17.5 13q0 .425.288.713T18.5 14Zm0-2q.825 0 1.413-.588T13 8q0-.825-.588-1.413T11 6q-.825 0-1.413.588T9 8q0 .825.588 1.413T11 10Zm0-2Z"/>
-      </svg>
-    </label>
+    <label for="toggle" class="keyer">...password and API key info...</label>
     <input type="checkbox" id="toggle" hidden>
-    <p class="content">
-      Want to get an *API Key*? Email me! <svg id="mail" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffa200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-mail"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-    </p>
+    <p class="content">Want an *API Key*? Email me!</p>
   </div>
   <script>
     $(function() {
@@ -54,11 +54,12 @@
       const $expiration = $('#expiration-input');
       const $result = $('#result');
       const expPattern = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2} (AM|PM)$/;
+      const origin = window.location.origin;
 
       function validateExpiration() {
         const val = $expiration.val().trim();
-        if (val !== '' && !expPattern.test(val)) {
-          $result.text('⚠️ Expiration must be in format YYYY-MM-DD hh:mm AM/PM')
+        if (val && !expPattern.test(val)) {
+          $result.text('⚠️ Expiration must be YYYY-MM-DD hh:mm AM/PM')
             .addClass('bad').removeClass('good');
           $submitBtn.prop('disabled', true);
           return false;
@@ -67,57 +68,65 @@
         $submitBtn.prop('disabled', false);
         return true;
       }
-
       $expiration.on('input', validateExpiration);
 
+      // Create link
       $('.create-form').submit(function(e) {
         e.preventDefault();
         if (!validateExpiration()) return;
         const secret = $('#secret-input').val().trim();
         const urlToShorten = $('#url-input').val().trim();
+        const password = $('#password-input').val().trim();
         const slug = $('#slug-input').val().trim();
         const expiration = $expiration.val().trim();
         if (!secret || !urlToShorten) {
           $result.text('⚠️ API Key and URL are required').addClass('bad');
           return;
         }
-        $result.removeClass('good bad').text('Checking credentials…');
         $.ajax({
-          url: '/api/auth',
+          url: '/api/create',
           type: 'POST',
-          headers: { 'Authorization': 'Bearer ' + secret },
-          success() {
-            $result.text('Authorized! Shortening URL…').addClass('good');
-            let payload = { url: urlToShorten };
-            if (slug) payload.slug = slug;
-            if (expiration) payload.expiration = expiration;
-            $.ajax({
-              url: '/api/create',
-              type: 'POST',
-              headers: {
-                'Authorization': 'Bearer ' + secret,
-                'Content-Type': 'application/json'
-              },
-              data: JSON.stringify(payload),
-              success(res) {
-                const origin = window.location.origin;
-                $result.html(
-                  `✅ URL shortened!<br>` +
-                  `Shortened URL: <a href="${origin}/${res.slug}" target="_blank">${origin}/${res.slug}</a><br>` +
-                  `Expires in: ${res.expirationInSeconds}s`
-                ).addClass('good');
-              },
-              error(xhr) {
-                $result.text('Error: ' + (xhr.responseJSON?.error || xhr.statusText))
-                  .addClass('bad');
-              }
-            });
+          headers: {
+            'Authorization': 'Bearer ' + secret,
+            'Content-Type': 'application/json'
+          },
+          data: JSON.stringify({ url: urlToShorten, password, slug, expiration }),
+          success(res) {
+            $result.html(
+              `✅ Shortened: <a href="${origin}/${res.slug}" target="_blank">${origin}/${res.slug}</a><br>` +
+              `Expires in: ${res.expirationInSeconds}s${res.passwordProtected? '<br>🔒 Password protected' : ''}`
+            ).addClass('good');
           },
           error(xhr) {
-            const msg = xhr.status === 401
-              ? 'Unauthorized! Wrong API Key.'
-              : 'Error authenticating. Please try again.';
-            $result.text(msg).addClass('bad');
+            $result.text('Error: ' + (xhr.responseJSON?.error || xhr.statusText)).addClass('bad');
+          }
+        });
+      });
+
+      // List links
+      $('#list').click(function() {
+        const secret = $('#secret-input').val().trim();
+        if (!secret) {
+          $result.text('⚠️ API Key required to list links').addClass('bad');
+          return;
+        }
+        $.ajax({
+          url: '/api/links',
+          type: 'GET',
+          headers: { 'Authorization': 'Bearer ' + secret },
+          success(res) {
+            $('#links-list').empty();
+            res.forEach(item => {
+              $('#links-list').append(
+                `<li><a href="${origin}/${item.slug}" target="_blank">${item.slug}</a> → ${item.url}` +
+                ` (${item.metadata.expirationInSeconds}s)` +
+                `${item.passwordProtected? ' 🔒' : ''}</li>`
+              );
+            });
+            $('.list-container').show();
+          },
+          error(xhr) {
+            $result.text('Error: ' + (xhr.statusText)).addClass('bad');
           }
         });
       });
