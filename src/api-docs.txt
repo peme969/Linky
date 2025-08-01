@@ -1,109 +1,93 @@
 
-A serverless paste API with expiration, password protection, and authentication, powered by Workers KV.
+# Link Shortener API Documentation
 
----
+A serverless link shortener API with expiration, password protection, and authentication, powered by Workers KV.
 
 ## 🌐 Base URL
 
 ```
-https://paste.peme969.dev
-```
+
+link.peme969.dev
+
+````
 
 ---
 
 ## 🔐 Authentication
 
-All `/api/*` routes require a **Bearer Token**:
+All `/api/*` routes require a **Bearer Token** in the `Authorization` header:
 
-**Header:**
 ```http
 Authorization: Bearer <API_KEY>
-```
-
----
-
-## 🔁 CORS Support
-
-CORS is fully supported with appropriate preflight handling.
+````
 
 ---
 
 ## 📂 Endpoints
 
----
-
-### `GET /`
-
-**Returns**:  
-The static HTML homepage.
-
-**Example:**
-```bash
-curl https://paste.peme969.dev/
-```
-
----
-
 ### `POST /api/create`
 
-Create a new paste.
+Shorten a new URL.
 
 **Headers:**
+
 - `Authorization: Bearer <API_KEY>`
 - `Content-Type: application/json`
 
 **Body:**
+
 ```json
 {
-  "text": "Hello, world!",
-  "password": "mypassword",                // Optional
-  "expiration": "2025-08-01 12:00 PM",     // Optional CST format
-  "slug": "customid"                       // Optional
+  "url": "https://example.com",
+  "slug": "customAlias",            // Optional
+  "expiration": "2025-08-01 12:00 PM", // Optional (CDT)
+  "password": "secret"              // Optional
 }
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
-  "slug": "customid",
+  "slug": "customAlias",
   "expirationInSeconds": 86400,
-  "formattedExpiration": "2025-08-01 12:00 PM CST"
+  "formattedExpiration": "August 1, 2025, 12:00 PM CDT"
 }
-```
-
-**Example:**
-```bash
-curl -X POST https://paste.peme969.dev/api/create \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"text":"My paste","expiration":"2025-08-01 10:00 AM","password":"1234"}'
 ```
 
 ---
 
-### `GET /api/view`
+### `GET /api/links`
 
-List all valid (non-expired) pastes.
+List **all** valid (non-expired) shortened URLs—public and password-protected alike.
 
 **Headers:**
+
 - `Authorization: Bearer <API_KEY>`
 
-**Example:**
-```bash
-curl -H "Authorization: Bearer YOUR_API_KEY" https://paste.peme969.dev/api/view
-```
-
 **Response:**
+
 ```json
 [
   {
-    "slug": "abc123",
+    "slug": "exmpl",
+    "url": "https://example.com",
     "metadata": {
-      "password": null,
+      "createdAt": "July 30, 2025, 09:00 AM CDT",
       "expirationInSeconds": 3600,
-      "formattedExpiration": "2025-08-01 12:00 PM CST",
-      "createdAt": "2025-07-28 07:30 AM CST"
+      "formattedExpiration": "July 30, 2025, 10:00 AM CDT",
+      "passwordProtected": false
+    }
+  },
+  {
+    "slug": "privatelink",
+    "url": "https://private.example.com",
+    "metadata": {
+      "createdAt": "July 30, 2025, 08:00 AM CDT",
+      "expirationInSeconds": 7200,
+      "formattedExpiration": "July 30, 2025, 10:00 AM CDT",
+      "passwordProtected": true
     }
   }
 ]
@@ -111,97 +95,59 @@ curl -H "Authorization: Bearer YOUR_API_KEY" https://paste.peme969.dev/api/view
 
 ---
 
-### `GET /api/view/:slug`
-
-Fetch a specific paste.
-
-**Response:**
-```json
-{
-  "text": "Hello, world!",
-  "metadata": {
-    "password": null,
-    "expirationInSeconds": 3600,
-    "formattedExpiration": "2025-08-01 12:00 PM CST",
-    "createdAt": "2025-07-28 07:30 AM CST"
-  }
-}
-```
-
-**Note:** If password-protected, include:
-```http
-Authorization: Bearer <password>
-```
-
-**Example:**
-```bash
-curl -H "Authorization: Bearer 1234" https://paste.peme969.dev/api/view/my-paste
-```
-
----
-
 ### `DELETE /api/delete`
 
-Delete a paste by slug.
+Delete a shortened URL by its slug.
 
 **Headers:**
+
 - `Authorization: Bearer <API_KEY>`
 - `Content-Type: application/json`
 
 **Body:**
+
 ```json
-{ "slug": "abc123" }
+{ "slug": "exmpl" }
 ```
 
 **Response:**
+
 ```json
 { "success": true }
-```
-
-**Example:**
-```bash
-curl -X DELETE https://paste.peme969.dev/api/delete \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"slug":"abc123"}'
-```
-
----
-
-### `GET /:slug`
-
-Fetch paste for public viewing (HTML).  
-- If password-protected: prompts user for password via browser.
-- If expired: returns `410 Gone`.
-
-**Example:**
-```bash
-curl https://paste.peme969.dev/abc123
 ```
 
 ---
 
 ### `GET /api/auth`
 
-Verify API key.
+Verify that an API key is valid.
 
 **Headers:**
+
 - `Authorization: Bearer <API_KEY>`
 
 **Response:**
-- `200 OK`: Authorized
-- `401 Unauthorized`: Invalid key
 
-**Example:**
-```bash
-curl -H "Authorization: Bearer YOUR_API_KEY" https://paste.peme969.dev/api/auth
-```
+- `200 OK` – Authorized
+- `401 Unauthorized` – Invalid key
+
+---
+
+### `GET /:slug`
+
+Redirects to the original URL.
+
+- **If the link is password-protected:**
+    - `GET` shows an unlock form.
+    - `POST` to the same URL with form-data `password=<secret>` unlocks and redirects.
+- **If expired:** returns `410 Gone`.
+- **If not found:** returns `404 Not Found`.
 
 ---
 
 ## ⚠️ Expiration Format
 
-Use CST format:
+Use CDT:
 
 ```
 YYYY-MM-DD hh:mm AM/PM
@@ -209,29 +155,3 @@ YYYY-MM-DD hh:mm AM/PM
 
 ---
 
-## 🛑 Status Codes
-
-| Code | Meaning                     |
-|------|-----------------------------|
-| 200  | OK                          |
-| 204  | No Content (for OPTIONS)    |
-| 400  | Bad Request (e.g., missing slug) |
-| 401  | Unauthorized (invalid API key) |
-| 404  | Not Found                   |
-| 410  | Gone (expired paste)        |
-
----
-
-## 🧾 Example Paste Object
-
-```json
-{
-  "text": "Secret note here...",
-  "metadata": {
-    "password": "optional",
-    "expirationInSeconds": 3600,
-    "formattedExpiration": "2025-08-01 12:00 PM CST",
-    "createdAt": "2025-07-28 08:00 AM CST"
-  }
-}
-```

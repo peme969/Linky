@@ -1,114 +1,157 @@
+
 # Link Shortener API Documentation
 
-A serverless, password-protected link shortener API with expiration and authentication, powered by Workers KV.
+A serverless link shortener API with expiration, password protection, and authentication, powered by Workers KV.
 
-## Base URL
+## 🌐 Base URL
 
+```
 
+link.peme969.dev
 
-https://link.peme969.dev
+````
 
+---
 
-## Authentication
+## 🔐 Authentication
 
-All `/api/*` routes (except redirects) require a **Bearer Token**:
+All `/api/*` routes require a **Bearer Token** in the `Authorization` header:
 
-
-
+```http
 Authorization: Bearer <API_KEY>
+````
 
+---
 
-## Password Protection
+## 📂 Endpoints
 
-- To create a password-protected link, include `password` in the create request.
-- To access a protected link, send the password in the `X-Link-Password` header on GET requests.
+### `POST /api/create`
 
-## Endpoints
-
-### POST `/api/create`
-Create a new shortened link.
+Shorten a new URL.
 
 **Headers:**
+
 - `Authorization: Bearer <API_KEY>`
 - `Content-Type: application/json`
 
 **Body:**
+
 ```json
 {
   "url": "https://example.com",
-  "password": "secret123",      // Optional
-  "expiration": "2025-08-01 12:00 PM",  // Optional
-  "slug": "customAlias"               // Optional
+  "slug": "customAlias",            // Optional
+  "expiration": "2025-08-01 12:00 PM", // Optional (CDT)
+  "password": "secret"              // Optional
 }
+```
 
+**Response:**
 
-### Response:
-
+```json
 {
   "success": true,
   "slug": "customAlias",
   "expirationInSeconds": 86400,
-  "passwordProtected": true
+  "formattedExpiration": "August 1, 2025, 12:00 PM CDT"
 }
+```
 
+---
 
-GET /api/links
+### `GET /api/links`
 
-List all your (public & private) shortened links.
+List **all** valid (non-expired) shortened URLs—public and password-protected alike.
 
-Headers:
+**Headers:**
 
-Authorization: Bearer <API_KEY>
+- `Authorization: Bearer <API_KEY>`
 
-Response:
+**Response:**
 
+```json
 [
   {
     "slug": "exmpl",
     "url": "https://example.com",
-    "passwordProtected": false,
     "metadata": {
       "createdAt": "July 30, 2025, 09:00 AM CDT",
-      "formattedExpiration": "July 31, 2025, 09:00 AM CDT",
-      "expiresAtUtc": 1690813200000,
-      "expirationInSeconds": 86400
+      "expirationInSeconds": 3600,
+      "formattedExpiration": "July 30, 2025, 10:00 AM CDT",
+      "passwordProtected": false
+    }
+  },
+  {
+    "slug": "privatelink",
+    "url": "https://private.example.com",
+    "metadata": {
+      "createdAt": "July 30, 2025, 08:00 AM CDT",
+      "expirationInSeconds": 7200,
+      "formattedExpiration": "July 30, 2025, 10:00 AM CDT",
+      "passwordProtected": true
     }
   }
 ]
+```
 
+---
 
-DELETE /api/delete
+### `DELETE /api/delete`
 
-Delete a link by slug.
+Delete a shortened URL by its slug.
 
-Headers:
+**Headers:**
 
-Authorization: Bearer <API_KEY>
+- `Authorization: Bearer <API_KEY>`
+- `Content-Type: application/json`
 
-Content-Type: application/json
+**Body:**
 
-Body:
-
+```json
 { "slug": "exmpl" }
+```
 
+**Response:**
 
-Response:
-
+```json
 { "success": true }
+```
 
+---
 
-GET /:slug
+### `GET /api/auth`
+
+Verify that an API key is valid.
+
+**Headers:**
+
+- `Authorization: Bearer <API_KEY>`
+
+**Response:**
+
+- `200 OK` – Authorized
+- `401 Unauthorized` – Invalid key
+
+---
+
+### `GET /:slug`
 
 Redirects to the original URL.
 
-If the link is expired → 410 Gone
+- **If the link is password-protected:**
+    - `GET` shows an unlock form.
+    - `POST` to the same URL with form-data `password=<secret>` unlocks and redirects.
+- **If expired:** returns `410 Gone`.
+- **If not found:** returns `404 Not Found`.
 
-If not found → 404 Not Found
+---
 
-If password-protected and header missing/wrong → 401 Unauthorized
+## ⚠️ Expiration Format
 
-Otherwise → 302 Redirect
+Use CDT:
 
-Password Header
+```
+YYYY-MM-DD hh:mm AM/PM
+```
 
-X-Link-Password: secret123
+---
+
