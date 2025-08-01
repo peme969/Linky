@@ -49,19 +49,13 @@
   </style>
 </head>
 <body>
-  <h1>Pastebin API Documentation</h1>
+  <h1>Link Shortener API Documentation</h1>
   <div id="docs"></div>
-
   <script>
     fetch('/api/docs')
       .then(res => res.text())
-      .then(md => {
-        document.getElementById('docs').innerHTML = marked.parse(md);
-      })
-      .catch(err => {
-        document.getElementById('docs').innerText = 'Failed to load documentation.';
-        console.error(err);
-      });
+      .then(md => document.getElementById('docs').innerHTML = marked.parse(md))
+      .catch(() => document.getElementById('docs').innerText = 'Failed to load documentation.');
   </script>
 </body>
 </html>
