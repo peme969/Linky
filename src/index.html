@@ -105,7 +105,7 @@
 
       // List links
       $('#list').click(function() {
-        const secret = $('#secret-input').val().trim();
+        const superSecret = $('#password-input').val().trim();
         if (!secret) {
           $result.text('⚠️ API Key required to list links').addClass('bad');
           return;
@@ -113,15 +113,25 @@
         $.ajax({
           url: '/api/links',
           type: 'GET',
-          headers: { 'Authorization': 'Bearer ' + secret },
+          headers: { 
+            'Authorization': 'Bearer ' + secret,
+            'X-Super-Secret': superSecret
+          },
           success(res) {
             $('#links-list').empty();
             res.forEach(item => {
-              $('#links-list').append(
-                `<li><a href="${origin}/${item.slug}" target="_blank">${item.slug}</a> → ${item.url}` +
-                ` (${item.metadata.expirationInSeconds}s)` +
-                `${item.passwordProtected? ' 🔒' : ''}</li>`
-              );
+              let line = `<li>
+             <a href="${origin}/${item.slug}" target="_blank">${item.slug}</a>
+             → ${item.url} (${item.metadata.expirationInSeconds}s)
+           `;
+           if (item.passwordProtected) {
+             line += ' 🔒';
+             if (item.password) {
+               line += ` (password: ${item.password})`; 
+             }
+           }
+           line += '</li>';
+           $('#links-list').append(line);
             });
             $('.list-container').show();
           },
