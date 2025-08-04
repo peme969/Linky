@@ -44,27 +44,36 @@
   </select>
   <h1>Peme969's Link Shortener</h1>
   <div class="container">
-    <div class="navbar"></div>
-    <form class="create-form">
-      <input id="secret-input"      type="text"     placeholder="API Key" required />
-      <input id="url-input"         type="url"      placeholder="URL to shorten" required />
-      <input id="password-input"    type="password" placeholder="Link Password (optional)" />
-      <input id="slug-input"        type="text"     placeholder="Custom alias (optional)" />
-      <input id="expiration-input" type="text"     placeholder="YYYY-MM-DD hh:mm AM/PM (optional)" />
-      <input type="submit" id="create" value="Shorten URL" />
-      <button type="button" id="list">List My Links</button>
-    </form>
-    <div class="result-container">
-      <h3 id="had">API Response:</h3>
-      <p id="result">Submit the form to shorten a URL or list your links...</p>
+    <!-- TABS NAV -->
+    <div class="tabs">
+      <div class="tab active" data-target="#create-tab">Create Link</div>
+      <div class="tab"        data-target="#manage-tab">Manage Links</div>
     </div>
+
+    <!-- CREATE PANEL -->
+    <div id="create-tab" class="tab-content active">
+      <form class="create-form">
+        <input id="secret-input"      type="text"     placeholder="API Key" required />
+        <input id="url-input"         type="url"      placeholder="URL to shorten" required />
+        <input id="password-input"    type="password" placeholder="Password (optional)" />
+        <input id="slug-input"        type="text"     placeholder="Custom alias (optional)" />
+        <input id="expiration-input"  type="text"     placeholder="YYYY-MM-DD hh:mm AM/PM (optional)" />
+        <input type="submit" id="create" value="Shorten URL" />
+      </form>
+      <div class="result-container">
+        <h3 id="had">API Response:</h3>
+        <p id="result">Submit the form to shorten a URL...</p>
+      </div>
+    </div>
+
+    <!-- MANAGE PANEL -->
     <div id="manage-tab" class="tab-content">
-      <div>
-        <input id="manage-api-key"        type="text" placeholder="API Key" /><br/>
-        <input id="manage-super-secret"   type="text" placeholder="Super Secret Key" /><br/>
+      <div class="manage-inputs">
+        <input id="manage-api-key"      type="text" placeholder="API Key" />
+        <input id="manage-super-secret" type="text" placeholder="Super Secret Key" />
         <button id="load-links" class="btn">Load My Links</button>
       </div>
-  
+
       <table id="links-table">
         <thead>
           <tr>
@@ -76,17 +85,14 @@
             <th>Delete</th>
           </tr>
         </thead>
-        <tbody>
-          <!-- populated by JS -->
-        </tbody>
+        <tbody></tbody>
       </table>
-  
+
       <div id="manage-info" class="info-box">
         Enter your keys and click “Load My Links.”<br/>
         Public links only need API key; private links need both.
       </div>
     </div>
-  
   </div>
   <div class="check">
     <label for="toggle" class="keyer">...password and API key info...</label>
