@@ -59,7 +59,6 @@ export default {
       );
     }
 
-    // --- 5) POST /api/create ---
     if (path === '/api/create' && method === 'POST') {
       let body;
       try {
@@ -77,51 +76,56 @@ export default {
           { status: 400, headers: { 'Content-Type': 'application/json', ...cors } }
         );
       }
-
-      // parse or default expiration
-      const userTZ = (request.cf && request.cf.timezone) || 'America/Chicago';
-      const dtExpires = expiration
-        ? DateTime.fromFormat(expiration, 'yyyy-MM-dd hh:mm a', { zone: userTZ })
-        : DateTime.now().plus({ days: 365 });
-      if (!dtExpires.isValid) {
-        return new Response(
-          JSON.stringify({ success: false, error: 'Bad expiration format' }),
-          { status: 400, headers: { 'Content-Type': 'application/json', ...cors } }
-        );
-      }
-
-      const expiresAtUtc = dtExpires.toUTC().toMillis();
+    
+      // 1) Determine expiresAtUtc & formattedExpiration
       const now = Date.now();
-      const dtCreated = DateTime.fromMillis(now).setZone(userTZ);
-      const formattedCreated = dtCreated.toLocaleString(DateTime.DATETIME_FULL);
-      const formattedExpiration = dtExpires.toLocaleString(DateTime.DATETIME_FULL);
+      let expiresAtUtc, formattedExpiration;
+      if (expiration) {
+        expiresAtUtc = DateTime
+          .fromFormat(expiration, 'yyyy-MM-dd hh:mm a', { zone: userTZ })
+          .toMillis();
+        formattedExpiration = DateTime
+          .fromMillis(expiresAtUtc, { zone: userTZ })
+          .toLocaleString(DateTime.DATETIME_FULL);
+      } else {
+        expiresAtUtc = null;              // “never expire”
+        formattedExpiration = 'Never';
+      }
+    
+      // 2) Created timestamp
+      const formattedCreated = DateTime
+        .fromMillis(now, { zone: userTZ })
+        .toLocaleString(DateTime.DATETIME_FULL);
+    
       const key = slug || generateSlug();
-
-      // build store object
       const data = {
         url: targetUrl,
         metadata: {
-          createdAtUtc: now, 
-          expiresAtUtc,
+          createdAtUtc:       now,
           formattedCreated,
+          expiresAtUtc,
           formattedExpiration,
-          passwordProtected: Boolean(password)
-        }
+          passwordProtected:  Boolean(password)
+        },
+        ...(password && { password })
       };
-      if (password) data.password = password;
-
+    
       await KV.put(key, JSON.stringify(data));
-
+    
       return new Response(
         JSON.stringify({
           success: true,
           slug: key,
-          expirationInSeconds: Math.floor((expiresAtUtc - now) / 1000),
+          // if expiresAtUtc is null we send null, else the countdown
+          expirationInSeconds: expiresAtUtc === null
+            ? null
+            : Math.floor((expiresAtUtc - now) / 1000),
           passwordProtected: Boolean(password)
         }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...cors } }
       );
     }
+    
 
     // --- 6) GET /api/links ---
     if (url.pathname === '/api/links' && request.method === 'GET') {
