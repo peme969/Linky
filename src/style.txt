@@ -43,7 +43,7 @@ h1 {
   justify-content: flex-start;
   align-items: center;
   transform: skew(-3deg);
-  align-content: center;
+  align-content: space-around;
   flex-wrap: wrap;
 }
 
@@ -54,11 +54,12 @@ h1 {
 
 .create-form {
   width: 100%;
+  text-align: center;
 }
 
 input[type="text"],
 input[type="password"] {
-  width: 25%;
+  width: 114%;
   background-color: #313131;
   border: solid 3px #313131;
   padding: 12px;
@@ -79,7 +80,7 @@ input[type="text"]:focus {
 }
 
 #create {
-  width: 27%;
+  width: 76%;
   color: #ffffff;
   background-color: var(--dynamic-text);
   padding: 15px;
@@ -223,7 +224,10 @@ textarea:focus {
 }
 
 .result-container {
-  width: 27%;
+  width: 122%;
+  position: relative;
+  height: 102%;
+  left: 20px;
   background-color: #313131;
   margin-top: 30px;
   transform: skew(-3deg);
