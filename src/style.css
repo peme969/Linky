@@ -91,7 +91,20 @@ input:focus {
 .btn:hover {
   background-color: #83a0a0;
 }
-
+#create {
+  width: 76%;
+  color: #ffffff;
+  background-color: var(--dynamic-text);
+  padding: 15px;
+  text-decoration: none;
+  text-align: center;
+  border: none;
+  font-size: 18px;
+  font-family: "JetBrains Mono", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
 /* delete icon button */
 .btn.delete {
   width: auto;
@@ -106,13 +119,15 @@ input:focus {
 }
 
 /* result pane */
-.result-container {
-  width: 27%;
-  background-color: #313131;
-  margin-left: -29px;
-  transform: skew(-3deg);
-}
-
+.result-container{
+width: 122%;
+    position: relative;
+    left: 20px;
+    background-color: #313131;
+    margin-top: 30px;
+    transform: skew(-3deg);
+    margin-left: -29px;
+} 
 #had {
   width: 100%;
   background-color: #0578f0;
@@ -217,4 +232,19 @@ input:focus {
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+input[type="text"],
+input[type="password"] {
+  width: 114%;
+  background-color: #313131;
+  border: solid 3px #313131;
+  padding: 12px;
+  color: #ffffff;
+  text-decoration: none;
+  text-align: center;
+  font-size: 18px;
+  font-family: "Raleway", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }
