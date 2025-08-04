@@ -43,56 +43,64 @@
     <option value="DeepOcean">DeepOcean</option>
   </select>
   <h1>Peme969's Link Shortener</h1>
+
+  <select class="palette-dropdown" id="palette-selector">
+    <option value="DarkSky">Dark Sky</option>
+    <option value="DeepOcean">Deep Ocean</option>
+  </select>
+
+  <h1>Peme969's Link Shortener</h1>
+
   <div class="container">
-    <!-- TABS NAV -->
+    <!-- tabs -->
     <div class="tabs">
       <div class="tab active" data-target="#create-tab">Create Link</div>
       <div class="tab"        data-target="#manage-tab">Manage Links</div>
     </div>
 
-    <!-- CREATE PANEL -->
+    <!-- create panel -->
     <div id="create-tab" class="tab-content active">
-      <form class="create-form">
-        <input id="secret-input"      type="text"     placeholder="API Key" required />
-        <input id="url-input"         type="url"      placeholder="URL to shorten" required />
-        <input id="password-input"    type="password" placeholder="Password (optional)" />
-        <input id="slug-input"        type="text"     placeholder="Custom alias (optional)" />
-        <input id="expiration-input"  type="text"     placeholder="YYYY-MM-DD hh:mm AM/PM (optional)" />
-        <input type="submit" id="create" value="Shorten URL" />
+      <form id="create-form" class="create-form">
+        <input id="create-api-key"    type="text"     placeholder="API Key" required />
+        <input id="create-url"        type="url"      placeholder="URL to shorten" required />
+        <input id="create-password"   type="password" placeholder="Link Password (optional)" />
+        <input id="create-slug"       type="text"     placeholder="Custom alias (optional)" />
+        <input id="create-expiration" type="text"     placeholder="YYYY-MM-DD hh:mm AM/PM (optional)" />
+        <button type="submit" id="create" class="btn">Shorten URL</button>
       </form>
       <div class="result-container">
         <h3 id="had">API Response:</h3>
-        <p id="result">Submit the form to shorten a URL...</p>
+        <p id="result">Submit the form to shorten a URL or list your links…</p>
       </div>
     </div>
 
-    <!-- MANAGE PANEL -->
+    <!-- manage panel -->
     <div id="manage-tab" class="tab-content">
       <div class="manage-inputs">
         <input id="manage-api-key"      type="text" placeholder="API Key" />
         <input id="manage-super-secret" type="text" placeholder="Super Secret Key" />
         <button id="load-links" class="btn">Load My Links</button>
       </div>
-
       <table id="links-table">
         <thead>
           <tr>
-            <th>Slug</th>
-            <th>URL</th>
-            <th>Public?</th>
-            <th>Created At</th>
-            <th>Expires At</th>
-            <th>Delete</th>
+            <th>Slug</th><th>URL</th><th>Public?</th>
+            <th>Created At</th><th>Expires At</th><th>Delete</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
-
       <div id="manage-info" class="info-box">
         Enter your keys and click “Load My Links.”<br/>
         Public links only need API key; private links need both.
       </div>
     </div>
+  </div>
+
+  <div class="check">
+    <label for="toggle" class="keyer">...password and API key info...</label>
+    <input type="checkbox" id="toggle" hidden />
+    <p class="content">Want an *API Key*? Email me!</p>
   </div>
   <div class="check">
     <label for="toggle" class="keyer">...password and API key info...</label>
