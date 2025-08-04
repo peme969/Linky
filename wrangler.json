@@ -7,6 +7,9 @@
   "observability": {
     "enabled": true
   },
+  "site": {
+    "bucket": "./public"
+  },
   "route": {
     "pattern": "link.peme969.dev/*",
     "zone_name": "peme969.dev"

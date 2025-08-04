@@ -30,9 +30,7 @@ body {
 
 h1 {
   font-family: "Nunito", serif;
-  font-optical-sizing: auto;
   font-weight: 400;
-  font-style: normal;
 }
 
 .container,
@@ -57,23 +55,19 @@ h1 {
 }
 
 input[type="text"],
-input[type="password"] {
+input[type="password"],
+input[type="url"] {
   width: 25%;
   background-color: #313131;
   border: solid 3px #313131;
   padding: 12px;
   color: #ffffff;
-  text-decoration: none;
   text-align: center;
   font-size: 18px;
   font-family: "Raleway", serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
 }
 
-input[type="password"]:focus,
-input[type="text"]:focus {
+input:focus {
   border-color: var(--dynamic-text);
   outline: none;
 }
@@ -88,9 +82,6 @@ input[type="text"]:focus {
   border: none;
   font-size: 18px;
   font-family: "JetBrains Mono", serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
 }
 
 #create:hover {
@@ -107,22 +98,13 @@ textarea {
   border: 2px solid #313131;
   font-size: 18px;
   font-family: "Raleway", serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
   color: #ffffff;
-  outline: none;
   transition: border-color 0.3s ease-in-out;
 }
 
 textarea::placeholder {
   color: #888;
   font-style: italic;
-  font-size: 18px;
-  font-family: "Raleway", serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
 }
 
 textarea:focus {
@@ -150,22 +132,22 @@ textarea:focus {
 
 @keyframes fadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
 @keyframes slideIn {
   from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(0);  opacity: 1; }
 }
 
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  50%      { transform: scale(1.1); }
 }
 
 @keyframes glow {
   0%, 100% { box-shadow: 0 0 20px #fff, 0 0 30px #FFD1F7; }
-  50% { box-shadow: 0 0 40px #fff, 0 0 60px #FFD1F7; }
+  50%      { box-shadow: 0 0 40px #fff, 0 0 60px #FFD1F7; }
 }
 
 .check {
@@ -204,9 +186,6 @@ textarea:focus {
   color: #83a0a0;
   font-size: 15px;
   font-family: "Raleway", serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
   background-color: #313131;
   border: 3px solid #313131;
   width: fit-content;
@@ -239,25 +218,97 @@ textarea:focus {
   padding: 10px 0;
   font-size: 18px;
   font-family: "JetBrains Mono", serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
   font-style: italic;
 }
 
 #result {
   font-family: "JetBrains Mono", serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
   margin-top: 0;
   text-align: center;
   width: 100%;
 }
 
-.good {
-  color: #41ff41;
+.good { color: #41ff41; }
+.bad  { color: red; }
+
+/* ───────────────────────────────────────── */
+/* NEW: Tabs and Manage-Links styling */
+
+.tabs {
+  display: flex;
+  margin-bottom: 1rem;
 }
 
-.bad {
-  color: red;
+.tab {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  margin-right: 1rem;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px 4px 0 0;
+  font-family: "JetBrains Mono", serif;
+}
+
+.tab.active {
+  background: var(--dynamic-text);
+  color: var(--dynamic-bg);
+}
+
+.tab-content {
+  display: none;
+  padding: 1rem;
+  background: #313131;
+  border-radius: 0 4px 4px 4px;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+#links-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+#links-table th,
+#links-table td {
+  padding: 0.5rem;
+  border: 1px solid #444;
+  text-align: left;
+  font-family: "Raleway", serif;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 3px;
+  font-family: "JetBrains Mono", serif;
+}
+
+.btn.delete {
+  color: #f33;
+  background: transparent;
+}
+
+.info-box {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #aaa;
+  font-family: "Raleway", serif;
+}
+
+.manage-inputs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.manage-inputs input {
+  width: 25%;
+  margin-top: 10px;
+}
+
+.manage-inputs .btn {
+  margin-top: 10px;
 }

@@ -27,18 +27,18 @@ export default {
     }
 
     // --- 2) Static assets ---
-    if (path === '/' || path === '') {
-      return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html', ...cors } });
-    }
-    if (path === '/run.js') {
-      return new Response(runJS, { status: 200, headers: { 'Content-Type': 'text/javascript', ...cors } });
-    }
-    if (path === '/docs' || path === '/docs/') {
-      return new Response(docsHtml, { status: 200, headers: { 'Content-Type': 'text/html', ...cors } });
-    }
-    if (path === '/style.css') {
-      return new Response(styleCss, { status: 200, headers: { 'Content-Type': 'text/css', ...cors } });
-    }
+    //if (path === '/' || path === '') {
+     // return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html', ...cors } });
+    //}
+    //if (path === '/run.js') {
+     // return new Response(runJS, { status: 200, headers: { 'Content-Type': 'text/javascript', ...cors } });
+    //}
+    //if (path === '/docs' || path === '/docs/') {
+     // return new Response(docsHtml, { status: 200, headers: { 'Content-Type': 'text/html', ...cors } });
+    //}
+    //if (path === '/style.css') {
+     // return new Response(styleCss, { status: 200, headers: { 'Content-Type': 'text/css', ...cors } });
+    //}
 
     // --- 3) API key check (all /api/* except /api/auth) ---
     if (path.startsWith('/api/') && path !== '/api/auth') {
