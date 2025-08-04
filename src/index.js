@@ -125,11 +125,11 @@ export default {
       const isSuper = request.headers.get('X-Super-Secret') === SUPER_SECRET_KEY;
       const now = Date.now();
       const list = await KV.list();
-
-      const items = await Promise.all(list.keys.map(async k => {
+      const linkKeys = list.keys.filter(k => k.name !== 'SUPER_SECRET_KEY');
+      const items = await Promise.all(linkKeys.map(async k => {
         const raw = await KV.get(k.name);
-        if (!raw) return null;
         const data = JSON.parse(raw);
+        if (!raw) return null;
         if (data.metadata.expiresAtUtc <= now) {
           await KV.delete(k.name);
           return null;
