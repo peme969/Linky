@@ -1,8 +1,8 @@
-import html from './index.html';
-import docsHtml from './docs.html';
-import styleCss from './style.txt';
+//import html from './index.html';
+//import docsHtml from './docs.html';
+//import styleCss from './style.txt';
 import { DateTime } from 'luxon';
-import runJS from './run.js';
+//import runJS from './run.js';
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
