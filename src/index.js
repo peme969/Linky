@@ -3,7 +3,6 @@ import docsHtml from './docs.html';
 import styleCss from './style.txt';
 import { DateTime } from 'luxon';
 import runJS from './run.js';
-import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 export default {
   async fetch(request, env,ctx) {
     const url = new URL(request.url);
@@ -244,17 +243,8 @@ export default {
     }
 
     // --- 9) fallback ---
-    //return new Response('Not Found', { status: 404, headers: cors });
-    try {
-      return await getAssetFromKV({
-        request, 
-        env, 
-        waitUntil: ctx.waitUntil
-      });
-    } catch (err) {
-      // If the asset wasn’t found, return a 404
-      return new Response('Not found', { status: 404 });
-    }
+    return new Response('Not Found', { status: 404, headers: cors });
+    
   }
 };
 
