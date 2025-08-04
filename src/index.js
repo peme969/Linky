@@ -120,46 +120,40 @@ export default {
     }
 
     // --- 6) GET /api/links ---
-    if (path === '/api/links' && method === 'GET') {
-      const SUPER_SECRET_KEY = await KV.get('SUPER_SECRET_KEY') || '';
-      const isSuper = request.headers.get('X-Super-Secret') === SUPER_SECRET_KEY;
-      const now = Date.now();
-      const list = await KV.list();
+    if (url.pathname === '/api/links' && request.method === 'GET') {
+      // 1) grab the super-secret from KV
+      const storedSecret = await env.URLS.get('SUPER_SECRET_KEY') || '';
+
+      // 2) fetch all keys, but drop the secret itself
+      const list = await env.URLS.list();
       const linkKeys = list.keys.filter(k => k.name !== 'SUPER_SECRET_KEY');
+
+      // 3) build your response array
       const items = await Promise.all(linkKeys.map(async k => {
-        const raw = await KV.get(k.name);
-        const data = JSON.parse(raw);
-        if (!raw) return null;
-        if (data.metadata.expiresAtUtc <= now) {
-          await KV.delete(k.name);
-          return null;
-        }
-        // if private & not super, hide it
-        if (data.metadata.passwordProtected && !isSuper) {
-          return null;
-        }
-        const item = {
+        const raw = await env.URLS.get(k.name);
+        // skip if missing or not JSON
+        if (!raw || raw[0] !== '{') return null;
+        let data;
+        try { data = JSON.parse(raw); }
+        catch { return null; }
+
+        // hide the password unless header matches
+        const wantSecret = request.headers.get('X-Super-Secret') || '';
+        const showPassword = wantSecret === storedSecret;
+        return {
           slug: k.name,
           url: data.url,
-          passwordProtected: data.metadata.passwordProtected,
-          metadata: {
-            createdAt: data.metadata.formattedCreated,
-            formattedExpiration: data.metadata.formattedExpiration,
-            expiresAtUtc: data.metadata.expiresAtUtc,
-            expirationInSeconds: Math.floor((data.metadata.expiresAtUtc - now) / 1000)
-          }
+          metadata: data.metadata,
+          ...(data.metadata.passwordProtected && showPassword
+            ? { password: data.metadata.password }
+            : {})
         };
-        // super sees the password too
-        if (isSuper && data.password) {
-          item.password = data.password;
-        }
-        return item;
       }));
 
-      return new Response(JSON.stringify(items.filter(i => i)), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...cors }
-      });
+      return new Response(
+        JSON.stringify(items.filter(i => i)),
+        { status: 200, headers: { 'Content-Type': 'application/json', ...cors } }
+      );
     }
 
     // --- 7) DELETE /api/delete ---
