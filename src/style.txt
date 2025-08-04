@@ -265,3 +265,24 @@ textarea:focus {
 .bad {
   color: red;
 }
+.btn:hover {
+  cursor: pointer;
+  background-color: #83a0a0;
+}
+.btn {
+  cursor: pointer;
+  border-radius: 3px;
+  margin-top: 20px;
+  height: 50px;
+  color: #ffffff;
+  background-color: var(--dynamic-text);
+  padding: 15px;
+  text-decoration: none;
+  text-align: center;
+  border: none;
+  font-size: 18px;
+  font-family: "JetBrains Mono", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
