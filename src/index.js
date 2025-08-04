@@ -101,6 +101,7 @@ export default {
       const data = {
         url: targetUrl,
         metadata: {
+          createdAtUtc: now, 
           expiresAtUtc,
           formattedCreated,
           formattedExpiration,
@@ -142,7 +143,9 @@ export default {
           let data;
           try { data = JSON.parse(raw); }
           catch { return null; }
-
+          if (data.metadata.passwordProtected && !isSuper) {
+                   return null;
+         }
           // 4) expire cleanup
           if (now >= data.metadata.expiresAtUtc) {
             await KV.delete(name);

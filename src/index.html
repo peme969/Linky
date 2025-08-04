@@ -300,12 +300,11 @@ function updateTitle(theme) {
         const redirectUrl = `${origin}/${link.slug}`;
 
         // Use the raw UTC timestamps for parsing
-        const createdMillis = link.metadata.createdAtUtc;
         const expiresMillis = link.metadata.expiresAtUtc;
-        
+        const createdMillis = link.metadata.createdAtUtc;
         const created = isNaN(createdMillis)
           ? 'Invalid date'
-          : new Date(createdMillis).toLocaleString();
+        : new Date(createdMillis).toLocaleString();
 
         const expires = isNaN(expiresMillis)
           ? 'Invalid date'
