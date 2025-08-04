@@ -105,8 +105,9 @@
 
       // List links
       $('#list').click(function() {
+        const secret      = $('#secret-input').val().trim();
         const superSecret = $('#password-input').val().trim();
-        if (!secret) {
+        if (!secret || !superSecret) {
           $result.text('⚠️ API Key required to list links').addClass('bad');
           return;
         }
