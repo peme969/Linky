@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
   <link rel="icon" type="image/x-icon" href="./favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
@@ -10,14 +9,14 @@
   <meta name="description" content="Peme969’s Personal Link Shortener">
   <meta name="keywords" content="link, shortener, peme969, cloudflare, cloudflare-workers, link-shortener">
   <meta name="robots" content="index, follow">
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Link Shortener 🔗</title>
-  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="./style.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <style>
-    body { background: #1e1e1e; color: #eee;  padding: 2rem; }
+    body { background: #1e1e1e; color: #eee; font-family: sans-serif; padding: 2rem; }
     .tabs { display: flex; margin-bottom: 1rem; }
     .tab {
       cursor: pointer;
@@ -28,7 +27,7 @@
       user-select: none;
     }
     .tab.active { background: #3b82f6; color: #fff; }
-    .tab-content { display: none; padding: 1rem; background: #2a2a2a00; border-radius: 0 4px 4px 4px; }
+    .tab-content { display: none; padding: 1rem; background: #2a2a2a; border-radius: 0 4px 4px 4px; }
     .tab-content.active { display: block; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     th, td { padding: 0.5rem; border: 1px solid #444; text-align: left; }
@@ -37,7 +36,7 @@
     .info-box { margin-top: 1rem; font-size: 0.9rem; color: #aaa; }
   </style>
 </head>
-<body>
+<body data-new-gr-c-s-check-loaded="14.1247.0" data-gr-ext-installed="">
   <select class="palette-dropdown" id="palette-selector">
     <option value="DarkSky">Dark Sky</option>
     <option value="DeepOcean">DeepOcean</option>
@@ -47,7 +46,7 @@
     <!-- TABS NAV -->
     <div class="tabs">
       <div class="tab active" data-target="#create-tab">Create Link</div>
-      <div class="tab"        data-target="#manage-tab">Manage Links</div>
+      <div class="tab" data-target="#manage-tab">Manage Links</div>
     </div>
 
     <!-- CREATE PANEL -->
@@ -56,12 +55,12 @@
     left: -48px;
 ">
       <form class="create-form">
-        <input id="secret-input"      type="text"     placeholder="API Key" required />
-        <input id="url-input"         type="url"      placeholder="URL to shorten" required />
-        <input id="password-input"    type="password" placeholder="Password (optional)" />
-        <input id="slug-input"        type="text"     placeholder="Custom alias (optional)" />
-        <input id="expiration-input"  type="text"     placeholder="YYYY-MM-DD hh:mm AM/PM (optional)" />
-        <input type="submit" id="create" value="Shorten URL" />
+        <input id="secret-input" type="text" placeholder="API Key" required="">
+        <input id="url-input" type="url" placeholder="URL to shorten" required="">
+        <input id="password-input" type="password" placeholder="Password (optional)">
+        <input id="slug-input" type="text" placeholder="Custom alias (optional)">
+        <input id="expiration-input" type="text" placeholder="YYYY-MM-DD hh:mm AM/PM (optional)">
+        <input type="submit" id="create" value="Shorten URL">
       </form>
       <div class="result-container">
         <h3 id="had">API Response:</h3>
@@ -72,8 +71,8 @@
     <!-- MANAGE PANEL -->
     <div id="manage-tab" class="tab-content">
       <div class="manage-inputs">
-        <input id="manage-api-key"      type="text" placeholder="API Key" />
-        <input id="manage-super-secret" type="text" placeholder="Super Secret Key" />
+        <input id="manage-api-key" type="text" placeholder="API Key">
+        <input id="manage-super-secret" type="text" placeholder="Super Secret Key">
         <button id="load-links" class="btn">Load My Links</button>
       </div>
 
@@ -92,7 +91,7 @@
       </table>
 
       <div id="manage-info" class="info-box">
-        Enter your keys and click “Load My Links.”<br/>
+        Enter your keys and click “Load My Links.”<br>
         Public links only need API key; private links need both.
       </div>
     </div>
@@ -223,7 +222,7 @@ function updateTitle(theme) {
 }
 
         </script>
-       </div>
+       
        <script src="./run.js"></script>
        <script>
         $(function() {
@@ -343,5 +342,6 @@ function updateTitle(theme) {
   });
   
        </script>
-   </body>
+    
+</body>
 </html>
