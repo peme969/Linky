@@ -8,7 +8,7 @@
     "enabled": true
   },
   "site": {
-    "bucket": "./src"
+    "bucket": "./public"
   },
   "route": {
     "pattern": "link.peme969.dev/*",
