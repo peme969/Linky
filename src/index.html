@@ -27,7 +27,7 @@
       user-select: none;
     }
     .tab.active { background: #3b82f6; color: #fff; }
-    .tab-content { display: none; padding: 1rem; background: #2a2a2a; border-radius: 0 4px 4px 4px; }
+    .tab-content { display: none; padding: 1rem; background: #2a2a2a00; border-radius: 0 4px 4px 4px; }
     .tab-content.active { display: block; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     th, td { padding: 0.5rem; border: 1px solid #444; text-align: left; }
@@ -69,10 +69,20 @@
     </div>
 
     <!-- MANAGE PANEL -->
-    <div id="manage-tab" class="tab-content">
-      <div class="manage-inputs">
-        <input id="manage-api-key" type="text" placeholder="API Key">
-        <input id="manage-super-secret" type="text" placeholder="Super Secret Key">
+    <div class="manage-inputs" style="
+    display: flex;
+    flex-direction: column;
+    align-content: stretch;
+    justify-content: space-evenly;
+    align-items: center;
+">
+        <input id="manage-api-key" type="text" placeholder="API Key" style="
+    width: 60%;
+">
+        <input id="manage-super-secret" type="text" placeholder="Super Secret Key" style="
+    width: 60%;
+    margin-top: 20px;
+">
         <button id="load-links" class="btn">Load My Links</button>
       </div>
 
