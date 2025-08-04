@@ -1,11 +1,11 @@
-//import html from './index.html';
-//import docsHtml from './docs.html';
-//import styleCss from './style.txt';
+import html from './index.html';
+import docsHtml from './docs.html';
+import styleCss from './style.txt';
 import { DateTime } from 'luxon';
-//import runJS from './run.js';
+import runJS from './run.js';
 import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 export default {
-  async fetch(request, env) {
+  async fetch(request, env,ctx) {
     const url = new URL(request.url);
     const path = url.pathname;
     const method = request.method;
@@ -28,18 +28,18 @@ export default {
     }
 
     // --- 2) Static assets ---
-    //if (path === '/' || path === '') {
-     // return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html', ...cors } });
-    //}
-    //if (path === '/run.js') {
-     // return new Response(runJS, { status: 200, headers: { 'Content-Type': 'text/javascript', ...cors } });
-    //}
-    //if (path === '/docs' || path === '/docs/') {
-     // return new Response(docsHtml, { status: 200, headers: { 'Content-Type': 'text/html', ...cors } });
-    //}
-    //if (path === '/style.css') {
-     // return new Response(styleCss, { status: 200, headers: { 'Content-Type': 'text/css', ...cors } });
-    //}
+    if (path === '/' || path === '') {
+      return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html', ...cors } });
+    }
+    if (path === '/run.js') {
+      return new Response(runJS, { status: 200, headers: { 'Content-Type': 'text/javascript', ...cors } });
+    }
+    if (path === '/docs' || path === '/docs/') {
+      return new Response(docsHtml, { status: 200, headers: { 'Content-Type': 'text/html', ...cors } });
+    }
+    if (path === '/style.css') {
+     return new Response(styleCss, { status: 200, headers: { 'Content-Type': 'text/css', ...cors } });
+    }
 
     // --- 3) API key check (all /api/* except /api/auth) ---
     if (path.startsWith('/api/') && path !== '/api/auth') {
@@ -244,17 +244,8 @@ export default {
     }
 
     // --- 9) fallback ---
-    //return new Response('Not Found', { status: 404, headers: cors });
-    try {
-      return await getAssetFromKV({
-        request, 
-        env, 
-        waitUntil: ctx.waitUntil
-      });
-    } catch (err) {
-      // If the asset wasn’t found, return a 404
-      return new Response('Not found', { status: 404 });
-    }
+    return new Response('Not Found', { status: 404, headers: cors });
+    
   }
 };
 
