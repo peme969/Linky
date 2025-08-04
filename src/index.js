@@ -146,16 +146,16 @@ export default {
           if (data.metadata.passwordProtected && !isSuper) {
                    return null;
          }
-          // 4) expire cleanup
-          if (now >= data.metadata.expiresAtUtc) {
-            await KV.delete(name);
-            return null;
-          }
+         if (data.metadata.expiresAtUtc !== null && now >= data.metadata.expiresAtUtc) {
+             await KV.delete(name);
+             return null;
+           }
 
           // 5) calculate time left
           const expiresAtUtc       = data.metadata.expiresAtUtc;
-          const expirationInSeconds = Math.floor((expiresAtUtc - now) / 1000);
-
+          const expirationInSeconds = data.metadata.expiresAtUtc === null
+            ? null
+            : Math.floor((data.metadata.expiresAtUtc - now) / 1000);
           // 6) assemble the item
           const item = {
             slug: name,

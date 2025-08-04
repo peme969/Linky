@@ -306,9 +306,9 @@ function updateTitle(theme) {
           ? 'Invalid date'
         : new Date(createdMillis).toLocaleString();
 
-        const expires = isNaN(expiresMillis)
-          ? 'Invalid date'
-          : new Date(expiresMillis).toLocaleString();
+        const expires = link.metadata.expiresAtUtc === null
+        ? 'Never'
+        : new Date(link.metadata.expiresAtUtc).toLocaleString();
 
         $tbody.append(`
           <tr>
