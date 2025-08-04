@@ -2,7 +2,7 @@ import html from './index.html';
 import docsHtml from './docs.html';
 import styleCss from './style.txt';
 import { DateTime } from 'luxon';
-
+import runJS from './run.js';
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -29,6 +29,9 @@ export default {
     // --- 2) Static assets ---
     if (path === '/' || path === '') {
       return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html', ...cors } });
+    }
+    if (path === '/run.js') {
+      return new Response(runJS, { status: 200, headers: { 'Content-Type': 'text/javascript', ...cors } });
     }
     if (path === '/docs' || path === '/docs/') {
       return new Response(docsHtml, { status: 200, headers: { 'Content-Type': 'text/html', ...cors } });

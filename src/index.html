@@ -16,6 +16,26 @@
   <title>My Link Shortener 🔗</title>
   <link rel="stylesheet" href="./style.css" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body { background: #1e1e1e; color: #eee; font-family: sans-serif; padding: 2rem; }
+    .tabs { display: flex; margin-bottom: 1rem; }
+    .tab {
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      margin-right: 1rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px 4px 0 0;
+      user-select: none;
+    }
+    .tab.active { background: #3b82f6; color: #fff; }
+    .tab-content { display: none; padding: 1rem; background: #2a2a2a; border-radius: 0 4px 4px 4px; }
+    .tab-content.active { display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 0.5rem; border: 1px solid #444; text-align: left; }
+    .btn { padding: 0.3rem 0.6rem; cursor: pointer; border: none; border-radius: 3px; }
+    .btn.delete { color: #f33; background: transparent; }
+    .info-box { margin-top: 1rem; font-size: 0.9rem; color: #aaa; }
+  </style>
 </head>
 <body>
   <select class="palette-dropdown" id="palette-selector">
@@ -38,10 +58,35 @@
       <h3 id="had">API Response:</h3>
       <p id="result">Submit the form to shorten a URL or list your links...</p>
     </div>
-    <div class="list-container" hidden>
-      <h3>Your Links</h3>
-      <ul id="links-list"></ul>
+    <div id="manage-tab" class="tab-content">
+      <div>
+        <input id="manage-api-key"        type="text" placeholder="API Key" /><br/>
+        <input id="manage-super-secret"   type="text" placeholder="Super Secret Key" /><br/>
+        <button id="load-links" class="btn">Load My Links</button>
+      </div>
+  
+      <table id="links-table">
+        <thead>
+          <tr>
+            <th>Slug</th>
+            <th>URL</th>
+            <th>Public?</th>
+            <th>Created At</th>
+            <th>Expires At</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- populated by JS -->
+        </tbody>
+      </table>
+  
+      <div id="manage-info" class="info-box">
+        Enter your keys and click “Load My Links.”<br/>
+        Public links only need API key; private links need both.
+      </div>
     </div>
+  
   </div>
   <div class="check">
     <label for="toggle" class="keyer">...password and API key info...</label>
@@ -175,5 +220,6 @@ function updateTitle(theme) {
 
         </script>
        </div>
+       <script src="./run.js"></script>
     </body>
 </html>
