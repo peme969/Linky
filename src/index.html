@@ -90,8 +90,8 @@
       <table id="links-table">
         <thead>
           <tr>
-            <th>Slug</th>
-            <th>URL</th>
+            <th>Redirect URL</th>
+            <th>Destination URL</th>
             <th>Public?</th>
             <th>Created At</th>
             <th>Expires At</th>
@@ -100,6 +100,7 @@
         </thead>
         <tbody></tbody>
       </table>
+      
 
       <div id="manage-info" class="info-box">
         Enter your keys and click “Load My Links.”<br>
@@ -271,86 +272,93 @@ function updateTitle(theme) {
       }
     });
   
-    // --- LOAD & DISPLAY LINKS ---
     async function loadLinks() {
-      const apiKey     = $('#manage-api-key').val().trim();
-      const superKey   = $('#manage-super-secret').val().trim();
-      const $tbody     = $('#links-table tbody');
-      $tbody.empty();
-      $('#manage-info').text('Loading…');
-  
-      try {
-        const links = await $.ajax({
-          url: '/api/links',
-          method: 'GET',
-          headers: {
-            'Authorization': 'Bearer ' + apiKey,
-            'X-Super-Secret': superKey
-          }
-        });
-  
-        if (!links.length) {
-          $('#manage-info').text('No links found.');
-          return;
+    const apiKey   = $('#manage-api-key').val().trim();
+    const superKey = $('#manage-super-secret').val().trim();
+    const $tbody   = $('#links-table tbody');
+    const origin   = window.location.origin;
+    $tbody.empty();
+    $('#manage-info').text('Loading…');
+
+    try {
+      const links = await $.ajax({
+        url: '/api/links',
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + apiKey,
+          'X-Super-Secret': superKey
         }
-  
-        // Populate table
-        links.forEach(link => {
-          const created = new Date(link.metadata.createdAt)
-                            .toLocaleString();
-          const expires = new Date(link.metadata.expiresAtUtc)
-                            .toLocaleString();
-  
-          $tbody.append(`
-            <tr>
-              <td>${link.slug}</td>
-              <td><a href="${link.url}" target="_blank">${link.url}</a></td>
-              <td>${link.passwordProtected ? 'Private' : 'Public'}</td>
-              <td>${created}</td>
-              <td>${expires}</td>
-              <td>
-                <button class="btn delete" data-slug="${link.slug}">
-                  🗑️
-                </button>
-              </td>
-            </tr>
-          `);
-        });
-  
-        $('#manage-info').text('Loaded ' + links.length + ' link(s).');
-  
-      } catch (err) {
-        $('#manage-info').text('Error loading links: ' +
-          (err.responseJSON?.error || err.statusText));
+      });
+
+      if (!links.length) {
+        $('#manage-info').text('No links found.');
+        return;
       }
+
+      links.forEach(link => {
+        // Construct the short (redirect) URL:
+        const redirectUrl = `${origin}/${link.slug}`;
+
+        // Use the raw UTC timestamps for parsing
+        const createdMillis = link.metadata.createdAtUtc;
+        const expiresMillis = link.metadata.expiresAtUtc;
+        
+        const created = isNaN(createdMillis)
+          ? 'Invalid date'
+          : new Date(createdMillis).toLocaleString();
+
+        const expires = isNaN(expiresMillis)
+          ? 'Invalid date'
+          : new Date(expiresMillis).toLocaleString();
+
+        $tbody.append(`
+          <tr>
+            <td><a href="${redirectUrl}" target="_blank">${redirectUrl}</a></td>
+            <td><a href="${link.url}" target="_blank">${link.url}</a></td>
+            <td>${link.passwordProtected ? 'Private' : 'Public'}</td>
+            <td>${created}</td>
+            <td>${expires}</td>
+            <td>
+              <button class="btn delete" data-slug="${link.slug}">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        `);
+      });
+
+      $('#manage-info').text(`Loaded ${links.length} link(s).`);
+    } catch (err) {
+      $('#manage-info').text('Error loading links: ' +
+        (err.responseJSON?.error || err.statusText));
     }
-  
-    // hook “Load My Links” button
-    $('#load-links').click(loadLinks);
-  
-    // delegate Delete button clicks
-    $('#links-table').on('click', '.btn.delete', async function() {
-      const slug    = $(this).data('slug');
-      const apiKey  = $('#manage-api-key').val().trim();
-      const superKey= $('#manage-super-secret').val().trim();
-  
-      if (!confirm(`Delete link “${slug}”?`)) return;
-  
-      try {
-        await $.ajax({
-          url: '/api/links/' + slug,
-          method: 'DELETE',
-          headers: {
-            'Authorization': 'Bearer ' + apiKey,
-            'X-Super-Secret': superKey
-          }
-        });
-        loadLinks();  // refresh
-      } catch (err) {
-        alert('Delete failed: ' + (err.responseJSON?.error || err.statusText));
-      }
-    });
+  }
+
+  $('#load-links').click(loadLinks);
+
+  // DELETE now calls /api/:slug (not /api/links/:slug)
+  $('#links-table').on('click', '.btn.delete', async function() {
+    const slug    = $(this).data('slug');
+    const apiKey  = $('#manage-api-key').val().trim();
+    const superKey= $('#manage-super-secret').val().trim();
+
+    if (!confirm(`Delete link “${slug}”?`)) return;
+
+    try {
+      await $.ajax({
+        url: `/api/${slug}`,
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + apiKey,
+          'X-Super-Secret': superKey
+        }
+      });
+      loadLinks();  // refresh table
+    } catch (err) {
+      alert('Delete failed: ' + (err.responseJSON?.error || err.statusText));
+    }
   });
+});
   
        </script>
     

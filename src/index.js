@@ -161,6 +161,7 @@ export default {
             metadata: {
               createdAt:           data.metadata.formattedCreated,
               formattedExpiration: data.metadata.formattedExpiration,
+              createdAtUtc:        data.metadata.createdAtUtc,
               expiresAtUtc,
               expirationInSeconds
             },
@@ -182,7 +183,8 @@ export default {
 
 
     // --- 7) DELETE /api/delete ---
-    if (path === '/api/delete' && method === 'DELETE') {
+    if (method === 'DELETE' && path.startsWith('/api/')) {
+      const slug = path.slice('/api/'.length);
       const SUPER_SECRET_KEY = await KV.get('SUPER_SECRET_KEY') || '';
       const isSuper = request.headers.get('X-Super-Secret') === SUPER_SECRET_KEY;
       if (!isSuper) {
@@ -191,17 +193,7 @@ export default {
           { status: 401, headers: { 'Content-Type': 'application/json', ...cors } }
         );
       }
-      let body;
-      try {
-        body = await request.json();
-      } catch {
-        return new Response(
-          JSON.stringify({ success: false, error: 'Invalid JSON' }),
-          { status: 400, headers: { 'Content-Type': 'application/json', ...cors } }
-        );
-      }
-      const { slug } = body;
-      if (!slug) {
+      if (!slug || typeof slug !== 'string') {
         return new Response(
           JSON.stringify({ success: false, error: 'Missing slug' }),
           { status: 400, headers: { 'Content-Type': 'application/json', ...cors } }
