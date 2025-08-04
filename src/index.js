@@ -121,40 +121,62 @@ export default {
 
     // --- 6) GET /api/links ---
     if (url.pathname === '/api/links' && request.method === 'GET') {
-      // 1) grab the super-secret from KV
-      const storedSecret = await env.URLS.get('SUPER_SECRET_KEY') || '';
+      // 1) load the admin secret and check caller
+      const storedSecret = await KV.get('SUPER_SECRET_KEY') || '';
+      const isSuper      = request.headers.get('X-Super-Secret') === storedSecret;
+      const now          = Date.now();
 
-      // 2) fetch all keys, but drop the secret itself
-      const list = await env.URLS.list();
-      const linkKeys = list.keys.filter(k => k.name !== 'SUPER_SECRET_KEY');
+      // 2) list all keys, but drop the secret entry
+      const { keys } = await KV.list();
+      const linkKeys = keys.filter(k => k.name !== 'SUPER_SECRET_KEY');
 
-      // 3) build your response array
-      const items = await Promise.all(linkKeys.map(async k => {
-        const raw = await env.URLS.get(k.name);
-        // skip if missing or not JSON
-        if (!raw || raw[0] !== '{') return null;
-        let data;
-        try { data = JSON.parse(raw); }
-        catch { return null; }
+      // 3) build your array of link objects
+      const items = await Promise.all(
+        linkKeys.map(async ({ name }) => {
+          const raw = await KV.get(name);
+          if (!raw || raw[0] !== '{') return null;    // skip non-JSON entries
 
-        // hide the password unless header matches
-        const wantSecret = request.headers.get('X-Super-Secret') || '';
-        const showPassword = wantSecret === storedSecret;
-        return {
-          slug: k.name,
-          url: data.url,
-          metadata: data.metadata,
-          ...(data.metadata.passwordProtected && showPassword
-            ? { password: data.metadata.password }
-            : {})
-        };
-      }));
+          let data;
+          try { data = JSON.parse(raw); }
+          catch { return null; }
+
+          // 4) expire cleanup
+          if (now >= data.metadata.expiresAtUtc) {
+            await KV.delete(name);
+            return null;
+          }
+
+          // 5) calculate time left
+          const expiresAtUtc       = data.metadata.expiresAtUtc;
+          const expirationInSeconds = Math.floor((expiresAtUtc - now) / 1000);
+
+          // 6) assemble the item
+          const item = {
+            slug: name,
+            url: data.url,
+            passwordProtected: !!data.metadata.passwordProtected,
+            metadata: {
+              createdAt:           data.metadata.formattedCreated,
+              formattedExpiration: data.metadata.formattedExpiration,
+              expiresAtUtc,
+              expirationInSeconds
+            },
+            // only reveal the password if this caller is “super”
+            ...(data.metadata.passwordProtected && isSuper
+              ? { password: data.password }
+              : {})
+          };
+
+          return item;
+        })
+      );
 
       return new Response(
-        JSON.stringify(items.filter(i => i)),
+        JSON.stringify(items.filter(Boolean)),
         { status: 200, headers: { 'Content-Type': 'application/json', ...cors } }
       );
     }
+
 
     // --- 7) DELETE /api/delete ---
     if (path === '/api/delete' && method === 'DELETE') {
