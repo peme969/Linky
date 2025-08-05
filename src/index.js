@@ -268,7 +268,10 @@ export default {
         const data = JSON.parse(raw);
         const now = Date.now();
 
-        if (now >= data.metadata.expiresAtUtc) {
+        if (
+          data.metadata.expiresAtUtc !== null &&
+          now >= data.metadata.expiresAtUtc
+        ) {
           await KV.delete(slug);
           return new Response("Gone", { status: 410, headers: cors });
         }
