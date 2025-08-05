@@ -262,7 +262,11 @@ function updateTitle(theme) {
         const res = await $.ajax({
           url: '/api/create',
           method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + apiKey },
+          headers: { 
+            'Authorization': 'Bearer ' + apiKey,
+            'X-Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone
+
+          },
           contentType: 'application/json',
           data: JSON.stringify({ url, expiration, slug, password })
         });

@@ -60,6 +60,7 @@ export default {
     }
 
     if (path === '/api/create' && method === 'POST') {
+      // parse JSON body…
       let body;
       try {
         body = await request.json();
@@ -77,7 +78,7 @@ export default {
         );
       }
     
-      // 1) Determine expiresAtUtc & formattedExpiration
+      // 1) Timestamp now and figure out expiresAtUtc
       const now = Date.now();
       let expiresAtUtc, formattedExpiration;
       if (expiration) {
@@ -88,15 +89,16 @@ export default {
           .fromMillis(expiresAtUtc, { zone: userTZ })
           .toLocaleString(DateTime.DATETIME_FULL);
       } else {
-        expiresAtUtc = null;              // “never expire”
+        expiresAtUtc       = null;      // never expire
         formattedExpiration = 'Never';
       }
     
-      // 2) Created timestamp
+      // 2) Format created
       const formattedCreated = DateTime
         .fromMillis(now, { zone: userTZ })
         .toLocaleString(DateTime.DATETIME_FULL);
     
+      // 3) Build and store
       const key = slug || generateSlug();
       const data = {
         url: targetUrl,
@@ -109,14 +111,13 @@ export default {
         },
         ...(password && { password })
       };
-    
       await KV.put(key, JSON.stringify(data));
     
+      // 4) Respond
       return new Response(
         JSON.stringify({
           success: true,
           slug: key,
-          // if expiresAtUtc is null we send null, else the countdown
           expirationInSeconds: expiresAtUtc === null
             ? null
             : Math.floor((expiresAtUtc - now) / 1000),
