@@ -60,7 +60,6 @@ export default {
     }
 
     if (path === '/api/create' && method === 'POST') {
-      // parse JSON body…
       let body;
       try {
         body = await request.json();
