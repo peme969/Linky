@@ -12,6 +12,7 @@
   --palette3-text: #a2cfcf;
   --dynamic-text: var(--palette1-text);
   --dynamic-bg: var(--palette1-bg);
+  --hover-color:   var(--palette1-text);
 }
 
 html, body {
@@ -285,4 +286,8 @@ textarea:focus {
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
+}
+#create:hover,
+.btn:hover {
+  background-color: var(--hover-color);
 }

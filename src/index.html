@@ -319,41 +319,47 @@
             });
         </script>
         <script>
-            // 1. Define your themes
             const themeDict = {
                 DarkSky: {
                     bg: "--palette1-bg",
                     text: "--palette1-text",
+                    hover: "--palette3-text", // use your text variable (#a2cfcf)
                     title: "My Pastebin 🌙🌌",
                 },
                 DeepOcean: {
                     bg: "--palette3-bg",
                     text: "--palette3-text",
+                    hover: "--palette1-text", // use your palette1-text (#ffa200)
                     title: "My Pastebin 🌊",
                 },
             };
 
-            // 2. Apply a given theme by name
             function applyTheme(theme) {
                 if (!themeDict[theme]) return;
                 const root = document.documentElement;
-                // update the dropdown UI
-                document.getElementById("palette-selector").value = theme;
-                // pull computed values from your CSS variables
-                const bg = getComputedStyle(root).getPropertyValue(
-                    themeDict[theme].bg,
+                const def = themeDict[theme];
+                // pull computed values
+                const bgVal = getComputedStyle(root).getPropertyValue(def.bg);
+                const textVal = getComputedStyle(root).getPropertyValue(
+                    def.text,
                 );
-                const text = getComputedStyle(root).getPropertyValue(
-                    themeDict[theme].text,
+                const hoverVal = getComputedStyle(root).getPropertyValue(
+                    def.hover,
                 );
-                // set dynamic CSS vars
-                root.style.setProperty("--dynamic-bg", bg);
-                root.style.setProperty("--dynamic-text", text);
-                // apply them to body
+
+                // set our dynamic vars
+                root.style.setProperty("--dynamic-bg", bgVal);
+                root.style.setProperty("--dynamic-text", textVal);
+                root.style.setProperty("--hover-color", hoverVal);
+
+                // apply to body
                 document.body.style.background = "var(--dynamic-bg)";
                 document.body.style.color = "var(--dynamic-text)";
-                // update the document title
-                document.title = themeDict[theme].title;
+                // update title
+                document.title = def.title;
+
+                // sync dropdown
+                document.getElementById("palette-selector").value = theme;
             }
 
             // 3. Listen for user changes
