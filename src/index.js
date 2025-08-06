@@ -3,6 +3,13 @@ import docsHtml from "./docs.html";
 import styleCss from "./style.txt";
 import { DateTime } from "luxon";
 import runJS from "./run.js";
+import siteWebmanifest from "./site.webmanifest.txt";
+import faviconIco from "./favicon.ico.txt";
+import favicon16 from "./favicon-16x16.txt";
+import favicon32 from "./favicon-32x32.txt";
+import appleicon from "./apple-touch-icon.txt";
+import androidChrome192 from "./android-chrome-192x192.txt";
+import androidChrome512 from "./android-chrome-512x512.txt";
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -57,20 +64,62 @@ export default {
         headers: { "Content-Type": "text/css", ...cors },
       });
     }
-
-    // --- 3) API key check (all /api/* except /api/auth) ---
-    if (path.startsWith("/api/") && path !== "/api/auth") {
-      const auth = request.headers.get("Authorization");
-      if (!auth || auth !== `Bearer ${API_SECRET}`) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Unauthorized" }),
-          {
-            status: 401,
-            headers: { "Content-Type": "application/json", ...cors },
-          },
-        );
-      }
+    if (path === "/site.webmanifest") {
+      return new Response(siteWebmanifest, {
+        status: 200,
+        headers: { "Content-Type": "application/manifest+json", ...cors },
+      });
     }
+    if (path === "/android-chrome-512x512.png") {
+      return new Response(androidChrome512, {
+        status: 200,
+        headers: { "Content-Type": "image/png", ...cors },
+      });
+    }
+    if (path === "/android-chrome-192x192.png") {
+      return new Response(androidChrome192, {
+        status: 200,
+        headers: { "Content-Type": "image/png", ...cors },
+      });
+    }
+    if (path === "/favicon.ico") {
+      return new Response(faviconIco, {
+        status: 200,
+        headers: { "Content-Type": "image/x-icon", ...cors },
+      });
+    }
+    if (path === "/favicon-16x16.png") {
+      return new Response(favicon16, {
+        status: 200,
+        headers: { "Content-Type": "image/png", ...cors },
+      });
+    }
+    if (path === "/favicon-32x32.png") {
+      return new Response(favicon32, {
+        status: 200,
+        headers: { "Content-Type": "image/png", ...cors },
+      });
+    }
+    if (path === "/apple-touch-icon.png") {
+      return new Response(appleicon, {
+        status: 200,
+        headers: { "Content-Type": "image/png", ...cors },
+      });
+    }
+    if (path === "/")
+      if (path.startsWith("/api/") && path !== "/api/auth") {
+        // --- 3) API key check (all /api/* except /api/auth) ---
+        const auth = request.headers.get("Authorization");
+        if (!auth || auth !== `Bearer ${API_SECRET}`) {
+          return new Response(
+            JSON.stringify({ success: false, error: "Unauthorized" }),
+            {
+              status: 401,
+              headers: { "Content-Type": "application/json", ...cors },
+            },
+          );
+        }
+      }
 
     // --- 4) /api/auth ---
     if (path === "/api/auth") {
