@@ -317,47 +317,61 @@
                     });
                 });
             });
-            $(document).ready(function () {
-                const savedTheme = localStorage.getItem("theme");
-                if (savedTheme) {
-                    applyTheme(savedTheme);
-                }
-            });
-            $(".palette-dropdown").on("change", function () {
-                const selectedTheme = $(this).val();
-                if (selectedTheme !== localStorage.getItem("theme")) {
-                    applyTheme(selectedTheme);
-                    localStorage.setItem("theme", selectedTheme);
-                }
-            });
+        </script>
+        <script>
+            // 1. Define your themes
+            const themeDict = {
+                DarkSky: {
+                    bg: "--palette1-bg",
+                    text: "--palette1-text",
+                    title: "My Pastebin 🌙🌌",
+                },
+                DeepOcean: {
+                    bg: "--palette3-bg",
+                    text: "--palette3-text",
+                    title: "My Pastebin 🌊",
+                },
+            };
+
+            // 2. Apply a given theme by name
             function applyTheme(theme) {
                 if (!themeDict[theme]) return;
                 const root = document.documentElement;
-                $(".palette-dropdown").val(theme);
-                root.style.setProperty(
-                    "--dynamic-bg",
-                    getComputedStyle(root).getPropertyValue(
-                        themeDict[theme].bg,
-                    ),
+                // update the dropdown UI
+                document.getElementById("palette-selector").value = theme;
+                // pull computed values from your CSS variables
+                const bg = getComputedStyle(root).getPropertyValue(
+                    themeDict[theme].bg,
                 );
-                root.style.setProperty(
-                    "--dynamic-text",
-                    getComputedStyle(root).getPropertyValue(
-                        themeDict[theme].text,
-                    ),
+                const text = getComputedStyle(root).getPropertyValue(
+                    themeDict[theme].text,
                 );
-                $("body").css({
-                    background: "var(--dynamic-bg)",
-                    color: "var(--dynamic-text)",
+                // set dynamic CSS vars
+                root.style.setProperty("--dynamic-bg", bg);
+                root.style.setProperty("--dynamic-text", text);
+                // apply them to body
+                document.body.style.background = "var(--dynamic-bg)";
+                document.body.style.color = "var(--dynamic-text)";
+                // update the document title
+                document.title = themeDict[theme].title;
+            }
+
+            // 3. Listen for user changes
+            document
+                .getElementById("palette-selector")
+                .addEventListener("change", function () {
+                    const selected = this.value;
+                    applyTheme(selected);
+                    localStorage.setItem("theme", selected);
                 });
-                updateTitle(theme);
-            }
-            function updateTitle(theme) {
-                if (document.title !== themeDict[theme].title) {
-                    document.title = themeDict[theme].title;
-                }
-            }
+
+            // 4. On page load, restore last theme (or default to DarkSky)
+            window.addEventListener("DOMContentLoaded", () => {
+                const saved = localStorage.getItem("theme") || "DarkSky";
+                applyTheme(saved);
+            });
         </script>
+
         <script>
             $(function () {
                 // --- TAB SWITCHING ---
