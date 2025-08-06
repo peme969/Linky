@@ -291,3 +291,22 @@ textarea:focus {
 .btn:hover {
   background-color: var(--hover-color);
 }
+
+#url-input {
+width: 114%;
+    background-color: #313131;
+    border: solid 3px #313131;
+    padding: 12px;
+    color: #ffffff;
+    text-decoration: none;
+    text-align: center;
+    font-size: 18px;
+    font-family: "Raleway", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
+#url-input:focus {
+border-color: var(--dynamic-text);
+outline: none;
+}
