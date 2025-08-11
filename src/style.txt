@@ -341,3 +341,33 @@ code {
     color: #ffffff;
     font-size: 14px;
 }
+/* Inline code only */
+p code, li code, span code {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 400;
+    background-color: #313131;
+    border: 1px solid #313131;
+    border-radius: 5px;
+    padding: 2px 4px;
+    font-size: 14px;
+    color: #ffffff;
+}
+
+/* Block code styling */
+pre {
+    background: #0b0e14;
+    border: 1px solid #1c2334;
+    border-radius: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    margin: 1em 0;
+}
+pre code {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 400;
+    font-size: 14px;
+    color: #e8ecf1;
+    background: transparent; /* no inline background for blocks */
+    border: none;
+    padding: 0;
+}
