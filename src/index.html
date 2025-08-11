@@ -435,6 +435,12 @@
                     const superKey = $("#manage-super-secret").val().trim();
                     const $tbody = $("#links-table tbody");
                     const origin = window.location.origin;
+
+                    if (!apiKey) {
+                        $("#manage-info").text("⚠️ API Key is required.");
+                        return;
+                    }
+
                     $tbody.empty();
                     $("#manage-info").text("Loading…");
 

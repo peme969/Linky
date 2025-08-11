@@ -113,25 +113,26 @@ export default {
         headers: { "Content-Type": "text/markdown", ...cors },
       });
     }
-    if (path === "/")
-      if (path.startsWith("/api/") && path !== "/api/auth") {
-        // --- 3) API key check (all /api/* except /api/auth) ---
-        const auth = request.headers.get("Authorization");
-        if (!auth || auth !== `Bearer ${API_SECRET}`) {
-          return new Response(
-            JSON.stringify({ success: false, error: "Unauthorized" }),
-            {
-              status: 401,
-              headers: { "Content-Type": "application/json", ...cors },
-            },
-          );
-        }
+    // --- 3) API key check (all /api/* except /api/auth) ---
+    if (path.startsWith("/api/") && path !== "/api/auth") {
+      const auth = request.headers.get("Authorization") || "";
+      if (auth !== `Bearer ${API_SECRET}`) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Unauthorized" }),
+          {
+            status: 401,
+            headers: { "Content-Type": "application/json", ...cors },
+          },
+        );
       }
+    }
 
     // --- 4) /api/auth ---
     if (path === "/api/auth") {
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
+      const auth = request.headers.get("Authorization") || "";
+      const ok = auth === `Bearer ${API_SECRET}`;
+      return new Response(JSON.stringify({ success: ok }), {
+        status: ok ? 200 : 401,
         headers: { "Content-Type": "application/json", ...cors },
       });
     }
