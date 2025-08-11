@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en" style="--dynamic-bg: #282c34; --dynamic-text: #ffa200">
     <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
         <link rel="icon" type="image/x-icon" href="./favicon.ico" />
         <link
             rel="apple-touch-icon"
@@ -202,6 +204,28 @@
                 </div>
             </div>
         </div>
+        <button id="downloadBtn">Download as PNG</button>
+
+        <script>
+            document
+                .getElementById("downloadBtn")
+                .addEventListener("click", () => {
+                    const element = document.getElementById("ban");
+
+                    html2canvas(element).then((canvas) => {
+                        // Convert the canvas to a PNG data URL
+                        const dataURL = canvas.toDataURL("image/png");
+
+                        // Create a temporary download link
+                        const link = document.createElement("a");
+                        link.href = dataURL;
+                        link.download = "banner.png";
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
+                });
+        </script>
         <script>
             $(function () {
                 const $submitBtn = $("#create");
