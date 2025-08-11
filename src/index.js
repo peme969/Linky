@@ -176,6 +176,10 @@ export default {
 
       // 3) Build and store
       const key = slug || generateSlug();
+      let passwordHash;
+      if (password) {
+        passwordHash = await hashPassword(password);
+      }
       const data = {
         url: targetUrl,
         clicks: 0,
@@ -187,6 +191,7 @@ export default {
           passwordProtected: Boolean(password),
         },
         ...(password && { password }),
+        ...(passwordHash && { passwordHash }),
       };
       await KV.put(key, JSON.stringify(data));
 
@@ -254,6 +259,9 @@ export default {
             url: data.url,
             clicks: data.clicks || 0,
             passwordProtected: !!data.metadata.passwordProtected,
+            ...(isSuper && data.metadata.passwordProtected && {
+              password: data.password,
+            }),
             metadata: {
               createdAt: data.metadata.formattedCreated,
               formattedExpiration: data.metadata.formattedExpiration,
@@ -261,10 +269,6 @@ export default {
               expiresAtUtc,
               expirationInSeconds,
             },
-            // only reveal the password if this caller is “super”
-            ...(data.metadata.passwordProtected && isSuper
-              ? { password: data.password }
-              : {}),
           };
 
           return item;
@@ -309,7 +313,7 @@ export default {
     }
 
     // --- 8) REDIRECT /:slug ---
-    if (method === "GET") {
+    if (method === "GET" || method === "POST") {
       const slug = path.slice(1);
       if (slug) {
         const raw = await KV.get(slug);
@@ -327,15 +331,29 @@ export default {
           return new Response("Gone", { status: 410, headers: cors });
         }
 
-        // if protected, check password
         if (data.metadata.passwordProtected) {
-          const provided = request.headers.get("X-Link-Password") || "";
-          if (provided !== data.password) {
-            return new Response("Unauthorized", { status: 401, headers: cors });
+          let provided = "";
+          if (method === "POST") {
+            try {
+              const form = await request.formData();
+              provided = form.get("password") || "";
+            } catch {
+              provided = "";
+            }
+          } else {
+            provided = request.headers.get("X-Link-Password") || "";
+          }
+
+          const hashed = await hashPassword(provided);
+          if (hashed !== data.passwordHash) {
+            const status = method === "POST" && provided ? 401 : 200;
+            return new Response(passwordForm(status === 401 ? "Invalid password" : undefined), {
+              status,
+              headers: { "Content-Type": "text/html", ...cors },
+            });
           }
         }
 
-        // public or (correctly unlocked) → increment clicks then redirect
         data.clicks = (data.clicks || 0) + 1;
         await KV.put(slug, JSON.stringify(data));
         return Response.redirect(data.url, 302);
@@ -360,4 +378,26 @@ function getCORSHeaders() {
 
 function generateSlug() {
   return [...Array(6)].map(() => Math.random().toString(36)[2]).join("");
+}
+
+async function hashPassword(pw) {
+  const enc = new TextEncoder();
+  const buf = await crypto.subtle.digest("SHA-256", enc.encode(pw));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function passwordForm(message) {
+  return `<!doctype html>
+<html><head><meta charset="utf-8"><title>Password Required</title></head>
+<body>
+  <h1>Password Required</h1>
+  ${message ? `<p style="color:red;">${message}</p>` : ""}
+  <form method="POST">
+    <label for="password">Enter password</label>
+    <input type="password" id="password" name="password" required />
+    <button type="submit">Unlock</button>
+  </form>
+</body></html>`;
 }
