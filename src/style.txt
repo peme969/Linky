@@ -326,3 +326,18 @@ a:active,
 a:focus {
     color: #0d72cb;
 }
+code {
+    font-family: "JetBrains Mono", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    margin-top: 0;
+    text-align: center;
+    width: auto;
+    border: 1px solid #313131;
+    padding: 4px;
+    border-radius: 5px;
+    background-color: #313131;
+    color: #ffffff;
+    font-size: 14px;
+}
