@@ -1,61 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pastebin API Documentation</title>
-  <link rel="stylesheet" href="/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
-  <style>
-    /* Docs page overrides */
-    #docs {
-      max-width: 800px;
-      margin: 2rem auto;
-      text-align: left;
-      line-height: 1.6;
-    }
-    #docs h1, #docs h2, #docs h3 {
-      color: var(--palette1-text);
-      margin-top: 1.5rem;
-    }
-    #docs p, #docs ul, #docs ol, #docs table {
-      color: var(--palette1-text);
-    }
-    hr {
-      border: none;
-      border-top: 1px solid var(--palette1-text);
-      margin: 2rem 0;
-    }
-    pre {
-      background: var(--palette3-bg);
-      color: var(--palette3-text);
-      padding: 1rem;
-      border-radius: 0.5rem;
-      overflow-x: auto;
-      font-family: 'JetBrains Mono', monospace;
-      border: 1px solid var(--palette1-text);
-    }
-    code {
-      background: var(--palette3-bg);
-      color: var(--palette3-text);
-      padding: 0.2rem 0.4rem;
-      border-radius: 0.25rem;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    a {
-      color: var(--palette1-text);
-      text-decoration: underline;
-    }
-  </style>
-</head>
-<body>
-  <h1>Link Shortener API Documentation</h1>
-  <div id="docs"></div>
-  <script>
-    fetch('/api/docs')
-      .then(res => res.text())
-      .then(md => document.getElementById('docs').innerHTML = marked.parse(md))
-      .catch(() => document.getElementById('docs').innerText = 'Failed to load documentation.');
-  </script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Linky! API Documentation</title>
+        <link rel="stylesheet" href="/style.css" />
+        <script
+            src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
+            defer
+        ></script>
+        <style>
+            /* Docs page overrides */
+            #docs {
+                max-width: 800px;
+                margin: 2rem auto;
+                text-align: left;
+                line-height: 1.6;
+            }
+            #docs h1,
+            #docs h2,
+            #docs h3 {
+                color: var(--palette1-text);
+                margin-top: 1.5rem;
+            }
+            #docs p,
+            #docs ul,
+            #docs ol,
+            #docs table {
+                color: var(--palette1-text);
+            }
+            hr {
+                border: none;
+                border-top: 1px solid var(--palette1-text);
+                margin: 2rem 0;
+            }
+            pre {
+                background: var(--palette3-bg);
+                color: var(--palette3-text);
+                padding: 1rem;
+                border-radius: 0.5rem;
+                overflow-x: auto;
+                font-family: "JetBrains Mono", monospace;
+                border: 1px solid var(--palette1-text);
+            }
+            code {
+                background: var(--palette3-bg);
+                color: var(--palette3-text);
+                padding: 0.2rem 0.4rem;
+                border-radius: 0.25rem;
+                font-family: "JetBrains Mono", monospace;
+            }
+            a {
+                color: var(--palette1-text);
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Linky! API Documentation!</h1>
+        <div id="docs"></div>
+        <script>
+            fetch("/api-docs.md")
+                .then((res) => res.text())
+                .then(
+                    (md) =>
+                        (document.getElementById("docs").innerHTML =
+                            marked.parse(md)),
+                )
+                .catch(
+                    () =>
+                        (document.getElementById("docs").innerText =
+                            "Failed to load documentation."),
+                );
+        </script>
+    </body>
 </html>
