@@ -17,7 +17,7 @@ export default {
     const path = url.pathname;
     const method = request.method;
     const KV = env.URLS;
-    const API_SECRET = KV.get("API_KEY");
+    const API_SECRET = (await KV.get("API_KEY")) || env.API_KEY || "";
     const cors = getCORSHeaders();
     const authHeader = request.headers.get("Authorization") || "";
     const isAuthed = API_SECRET && authHeader === `Bearer ${API_SECRET}`;
@@ -114,19 +114,7 @@ export default {
         headers: { "Content-Type": "text/markdown", ...cors },
       });
     }
-    // --- 3) API key check (all /api/* except /api/auth) ---
-    if (path.startsWith("/api/") && path !== "/api/auth") {
-      const auth = request.headers.get("Authorization") || "";
-      if (auth !== `Bearer ${API_SECRET}`) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Unauthorized" }),
-          {
-            status: 401,
-            headers: { "Content-Type": "application/json", ...cors },
-          },
-        );
-      }
-    }
+    // Enforce API key on all API routes except /api/auth
     if (path.startsWith("/api/") && path !== "/api/auth") {
       if (!isAuthed) {
         return new Response(
