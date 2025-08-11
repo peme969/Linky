@@ -370,16 +370,22 @@
             })();
         </script>
         <script>
-            // after rendering the markdown:
-            initCopyButtons(content);
+            initCopyButtons(content); // add buttons now that the HTML exists
+
+            // optional: guard against later DOM changes (if you re-render)
+            new MutationObserver(() => initCopyButtons(content)).observe(
+                content,
+                { childList: true, subtree: true },
+            );
 
             function initCopyButtons(scope) {
                 scope.querySelectorAll("pre").forEach((pre) => {
-                    if (pre.querySelector(".copy-btn")) return; // avoid dupes
+                    if (pre.querySelector(".copy-btn")) return; // don't duplicate
                     const btn = document.createElement("button");
                     btn.type = "button";
                     btn.className = "copy-btn";
                     btn.textContent = "Copy";
+                    pre.style.position = "relative";
                     pre.appendChild(btn);
 
                     btn.addEventListener("click", () => {
