@@ -319,3 +319,6 @@ font-family: "Cairo Play", sans-serif;
     color: #e7a647;
     font-size: 40px;
 }
+a {
+    color:#0d72cb;
+}
