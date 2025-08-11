@@ -17,7 +17,7 @@ const hash = async (str) => {
     .join("");
 };
 
-describe("URL shortener worker", () => {
+describe("Linky worker", () => {
   it("serves index page at root", async () => {
     const response = await SELF.fetch("http://example.com/");
     const text = await response.text();
