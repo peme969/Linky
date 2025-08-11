@@ -185,6 +185,7 @@
                             <th>Public?</th>
                             <th>Created At</th>
                             <th>Expires At</th>
+                            <th>Clicks</th>
                             <th>Delete</th>
                         </tr>
                     </thead>
@@ -475,6 +476,7 @@
             <td>${link.passwordProtected ? "Private" : "Public"}</td>
             <td>${created}</td>
             <td>${expires}</td>
+            <td>${link.clicks || 0}</td>
             <td>
               <button class="btn delete" data-slug="${link.slug}">
                 🗑️
