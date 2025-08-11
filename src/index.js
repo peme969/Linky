@@ -178,6 +178,7 @@ export default {
       const key = slug || generateSlug();
       const data = {
         url: targetUrl,
+        clicks: 0,
         metadata: {
           createdAtUtc: now,
           formattedCreated,
@@ -251,6 +252,7 @@ export default {
           const item = {
             slug: name,
             url: data.url,
+            clicks: data.clicks || 0,
             passwordProtected: !!data.metadata.passwordProtected,
             metadata: {
               createdAt: data.metadata.formattedCreated,
@@ -333,7 +335,9 @@ export default {
           }
         }
 
-        // public or (correctly unlocked) → redirect
+        // public or (correctly unlocked) → increment clicks then redirect
+        data.clicks = (data.clicks || 0) + 1;
+        await KV.put(slug, JSON.stringify(data));
         return Response.redirect(data.url, 302);
       }
     }
