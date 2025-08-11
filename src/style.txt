@@ -371,3 +371,34 @@ pre code {
     border: none;
     padding: 0;
 }
+/* Copy button for code blocks */
+pre {
+    position: relative;
+}
+
+.copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #444;
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-family: "JetBrains Mono", monospace;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease-in-out, background 0.2s;
+}
+
+.copy-btn:hover {
+    opacity: 1;
+    background: var(--dynamic-text);
+    color: #000;
+}
+
+.copy-btn.copied {
+    background: #41ff41;
+    color: #000;
+}

@@ -369,5 +369,37 @@
                 }
             })();
         </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                document.querySelectorAll("pre code").forEach((block) => {
+                    // Create button
+                    const btn = document.createElement("button");
+                    btn.textContent = "Copy";
+                    btn.className = "copy-btn";
+
+                    // Append button to <pre>
+                    block.parentNode.style.position = "relative";
+                    block.parentNode.appendChild(btn);
+
+                    // Copy logic
+                    btn.addEventListener("click", () => {
+                        const code = block.innerText;
+                        navigator.clipboard
+                            .writeText(code)
+                            .then(() => {
+                                btn.textContent = "Copied!";
+                                btn.classList.add("copied");
+                                setTimeout(() => {
+                                    btn.textContent = "Copy";
+                                    btn.classList.remove("copied");
+                                }, 1500);
+                            })
+                            .catch((err) => {
+                                console.error("Copy failed", err);
+                            });
+                    });
+                });
+            });
+        </script>
     </body>
 </html>
