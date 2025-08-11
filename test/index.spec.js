@@ -109,6 +109,58 @@ describe("Linky worker", () => {
     expect(data.clicks).toBe(1);
   });
 
+  it("supports legacy links with plaintext passwords", async () => {
+    const slug = "legacy";
+    const now = Date.now();
+    await env.URLS.put(
+      slug,
+      JSON.stringify({
+        url: "https://example.com",
+        clicks: 0,
+        password: "secret",
+        metadata: {
+          createdAtUtc: now,
+          formattedCreated: "",
+          expiresAtUtc: null,
+          formattedExpiration: "Never",
+          passwordProtected: true,
+        },
+      }),
+    );
+
+    // GET should return HTML form
+    let req = new Request(`http://example.com/${slug}`);
+    let ctx = createExecutionContext();
+    let resp = await worker.fetch(req, env, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(resp.status).toBe(200);
+
+    // POST wrong password
+    req = new Request(`http://example.com/${slug}`, {
+      method: "POST",
+      body: new URLSearchParams({ password: "wrong" }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+    ctx = createExecutionContext();
+    resp = await worker.fetch(req, env, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(resp.status).toBe(401);
+
+    // POST correct password
+    req = new Request(`http://example.com/${slug}`, {
+      method: "POST",
+      body: new URLSearchParams({ password: "secret" }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+    ctx = createExecutionContext();
+    resp = await worker.fetch(req, env, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(resp.status).toBe(302);
+
+    const stored = JSON.parse(await env.URLS.get(slug));
+    expect(stored.passwordHash).toBe(await hash("secret"));
+  });
+
   it("allows super user to view private link passwords", async () => {
     const slug = "priv";
     const now = Date.now();

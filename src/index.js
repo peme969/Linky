@@ -344,13 +344,25 @@ export default {
             provided = request.headers.get("X-Link-Password") || "";
           }
 
-          const hashed = await hashPassword(provided);
-          if (hashed !== data.passwordHash) {
+          let valid = false;
+          if (data.passwordHash) {
+            const hashed = await hashPassword(provided);
+            valid = hashed === data.passwordHash;
+          } else if (data.password) {
+            valid = provided === data.password;
+            if (valid) {
+              data.passwordHash = await hashPassword(data.password);
+            }
+          }
+          if (!valid) {
             const status = method === "POST" && provided ? 401 : 200;
-            return new Response(passwordForm(status === 401 ? "Invalid password" : undefined), {
-              status,
-              headers: { "Content-Type": "text/html", ...cors },
-            });
+            return new Response(
+              passwordForm(status === 401 ? "Invalid password" : undefined),
+              {
+                status,
+                headers: { "Content-Type": "text/html", ...cors },
+              },
+            );
           }
         }
 
