@@ -1,162 +1,233 @@
+# Linky! Developer API
 
-# Link Shortener API Documentation
+Serverless link shortener with auth, expiration, optional password-protection, and an admin view—backed by Workers KV.
 
-A serverless link shortener API with expiration, password protection, and authentication, powered by Workers KV. Passwords may be viewed only by super users who provide the correct admin secret.
-
-## 🌐 Base URL
+## Base URL
 
 ```
+https://link.peme969.dev
+```
 
-link.peme969.dev
+## Auth model (important)
 
-````
+- All `GET|POST|DELETE /api/*` routes require:
 
----
-
-## 🔐 Authentication
-
-All `/api/*` routes require a **Bearer Token** in the `Authorization` header:
-
-```http
+```
 Authorization: Bearer <API_KEY>
-````
+```
+
+The key is read from `env.URLs.API_KEY (or Workers KV) at runtime. Only `/api/auth` is exempt from the guard so you can test keys.
+- Admin actions and visibility use a separate secret:
+
+```
+X-Super-Secret: <ADMIN_KEY>
+```
+
+Used to see private links on `/api/links` and to delete slugs.
 
 ---
 
-## 📂 Endpoints
+## Create a link
 
-### `POST /api/create`
+`POST /api/create`
 
-Shorten a new URL.
+Create (or overwrite) a short link.
 
-**Headers:**
+**Headers**
 
-- `Authorization: Bearer <API_KEY>`
-- `Content-Type: application/json`
+```
+Authorization: Bearer <API_KEY>
+Content-Type: application/json
+X-Timezone: <IANA tz, e.g. America/Chicago>   # optional; defaults to UTC
+```
 
-**Body:**
+**Body**
 
 ```json
 {
-  "url": "https://example.com",
-  "slug": "customAlias",            // Optional
-  "expiration": "2025-08-01 12:00 PM", // Optional (CDT)
-  "password": "secret"              // Optional
+  "url": "https://example.com",             // required
+  "slug": "customAlias",                     // optional; 6-char random if omitted
+  "expiration": "2025-08-20 03:30 PM",      // optional; format "yyyy-MM-dd hh:mm a"
+  "password": "secret"                       // optional; enables password protection
 }
 ```
 
-**Response:**
+- Expiration is parsed in the timezone provided by `X-Timezone` (else UTC). Format is exactly `"yyyy-MM-dd hh:mm a"`.
+- If no expiration, link never expires.
+- Default slugs are 6 random base36 chars.
+
+**Response**
 
 ```json
 {
   "success": true,
   "slug": "customAlias",
-  "expirationInSeconds": 86400,
-  "formattedExpiration": "August 1, 2025, 12:00 PM CDT"
+  "expirationInSeconds": 86400,             // null if no expiration
+  "passwordProtected": true
 }
 ```
 
-Passwords can be viewed only when the `X-Super-Secret` header matches the super admin key.
-
 ---
 
-### `GET /api/links`
+## List links (admin-aware)
 
-List **all** valid (non-expired) shortened URLs.
+`GET /api/links`
 
-**Headers:**
+Returns all **valid (non-expired)** links. Password-protected links are **hidden** unless you include the admin header.
 
-- `Authorization: Bearer <API_KEY>`
-- `X-Super-Secret: <ADMIN_KEY>` – Optional; include to also return private links and their passwords.
+**Headers**
 
-**Response (with super secret):**
+```
+Authorization: Bearer <API_KEY>
+X-Super-Secret: <ADMIN_KEY>    # optional, reveals private links and their password (if stored)
+```
+
+- Private links are filtered out when `X-Super-Secret` does not match.
+- Expired links are deleted server-side and omitted.
+
+**Response (shape)**
 
 ```json
 [
   {
-    "slug": "exmpl",
+    "slug": "abc123",
     "url": "https://example.com",
-    "password": null,
+    "clicks": 5,
+    "passwordProtected": false,
     "metadata": {
-      "createdAt": "July 30, 2025, 09:00 AM CDT",
-      "expirationInSeconds": 3600,
-      "formattedExpiration": "July 30, 2025, 10:00 AM CDT",
-      "passwordProtected": false
-    }
-  },
-  {
-    "slug": "privatelink",
-    "url": "https://private.example.com",
-    "password": "secret",
-    "metadata": {
-      "createdAt": "July 30, 2025, 08:00 AM CDT",
-      "expirationInSeconds": 7200,
-      "formattedExpiration": "July 30, 2025, 10:00 AM CDT",
-      "passwordProtected": true
+      "createdAt": "August 10, 2025 at 5:22 PM CDT",
+      "formattedExpiration": "Never",
+      "createdAtUtc": 1723338123456,
+      "expiresAtUtc": null,
+      "expirationInSeconds": null
     }
   }
 ]
 ```
 
+- With `X-Super-Secret` and for password-protected links, a `"password": "<cleartext or null>"` field may be included (if the original password is still stored).
+- Count of clicks is included per item.
+
 ---
 
-### `DELETE /api/delete`
+## Delete a link (admin)
 
-Delete a shortened URL by its slug.
+`DELETE /api/{slug}`
 
-**Headers:**
+Deletes a short link by its slug.
 
-- `Authorization: Bearer <API_KEY>`
-- `Content-Type: application/json`
+**Headers**
 
-**Body:**
-
-```json
-{ "slug": "exmpl" }
+```
+Authorization: Bearer <API_KEY>
+X-Super-Secret: <ADMIN_KEY>
 ```
 
-**Response:**
+**Response**
 
 ```json
 { "success": true }
 ```
 
----
-
-### `GET /api/auth`
-
-Verify that an API key is valid.
-
-**Headers:**
-
-- `Authorization: Bearer <API_KEY>`
-
-**Response:**
-
-- `200 OK` – Authorized
-- `401 Unauthorized` – Invalid key
+> Note: The route is the slug itself after `/api/` (no JSON body). Example: `DELETE /api/abc123`.
 
 ---
 
-### `GET /:slug`
+## Check an API key
 
-Redirects to the original URL.
+`GET /api/auth`
 
-- **If the link is password-protected:**
-    - `GET` shows an unlock form.
-    - `POST` to the same URL with form-data `password=<secret>` unlocks and redirects.
-- **If expired:** returns `410 Gone`.
-- **If not found:** returns `404 Not Found`.
+Quick key check.
 
----
-
-## ⚠️ Expiration Format
-
-Use CDT:
+**Headers**
 
 ```
-YYYY-MM-DD hh:mm AM/PM
+Authorization: Bearer <API_KEY>
 ```
+
+**Response**
+
+```json
+{ "success": true, "hasServerKey": true }
+```
+
+- `200 OK` if valid; `401 Unauthorized` if not. Field `hasServerKey` helps diagnose server config.
 
 ---
 
+## Resolve a slug (public)
+
+`GET /:slug` → 302 redirect to the original URL.
+
+- If the link is **password-protected**:
+
+    - `GET` returns an HTML unlock form.
+    - You can also unlock via header: `X-Link-Password: <password>`.
+    - Or submit the form: `POST /:slug` with form-data `password=<secret>`.
+- On success, the click counter increments.
+- If expired: `410 Gone`. If not found: `404 Not Found`.
+
+### Password internals (FYI)
+
+- If a plain password was stored, the first successful unlock converts it to a SHA-256 hash transparently.
+- You can also pass `X-Link-Password` on the initial `GET` to unlock without the form.
+
+---
+
+## Headers you might need
+
+- `Authorization: Bearer <API_KEY>` — required for all `/api/*` except `/api/auth`.
+- `X-Super-Secret: <ADMIN_KEY>` — admin-only behaviors (list private links, delete).
+- `X-Timezone: America/Chicago` — controls how the server parses/prints expiration times. Defaults to UTC.
+- `X-Link-Password: <password>` — unlock a protected link on `GET /:slug`.
+
+---
+
+## Curl examples
+
+**Create**
+
+```bash
+curl -sS https://link.peme969.dev/api/create \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "X-Timezone: America/Chicago" \
+  -d '{"url":"https://example.com","expiration":"2025-08-20 03:30 PM","password":"secret"}'
+```
+
+**List (public only)**
+
+```bash
+curl -sS https://link.peme969.dev/api/links \
+  -H "Authorization: Bearer $API_KEY"
+```
+
+**List (include private + passwords)**
+
+```bash
+curl -sS https://link.peme969.dev/api/links \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "X-Super-Secret: $ADMIN_KEY"
+```
+
+**Delete**
+
+```bash
+curl -sS -X DELETE https://link.peme969.dev/api/abc123 \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "X-Super-Secret: $ADMIN_KEY"
+```
+
+**Auth check**
+
+```bash
+curl -i https://link.peme969.dev/api/auth \
+  -H "Authorization: Bearer $API_KEY"
+```
+
+**Unlock via header**
+
+```bash
+curl -I https://link.peme969.dev/abc123 \
+  -H "X-Link-Password: secret"
+```
