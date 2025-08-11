@@ -20,6 +20,8 @@ export default {
 
     const API_SECRET = env.API_KEY;
     const cors = getCORSHeaders();
+    const authHeader = request.headers.get("Authorization") || "";
+    const isAuthed = API_SECRET && authHeader === `Bearer ${API_SECRET}`;
 
     // --- 0) Ensure KV is bound ---
     if (!KV || typeof KV.get !== "function") {
@@ -126,15 +128,28 @@ export default {
         );
       }
     }
-
-    // --- 4) /api/auth ---
+    if (path.startsWith("/api/") && path !== "/api/auth") {
+      if (!isAuthed) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Unauthorized" }),
+          {
+            status: 401,
+            headers: { "Content-Type": "application/json", ...cors },
+          },
+        );
+      }
+    }
     if (path === "/api/auth") {
-      const auth = request.headers.get("Authorization") || "";
-      const ok = auth === `Bearer ${API_SECRET}`;
-      return new Response(JSON.stringify({ success: ok }), {
-        status: ok ? 200 : 401,
-        headers: { "Content-Type": "application/json", ...cors },
-      });
+      return new Response(
+        JSON.stringify({
+          success: isAuthed,
+          hasServerKey: !!API_SECRET,
+        }),
+        {
+          status: isAuthed ? 200 : 401,
+          headers: { "Content-Type": "application/json", ...cors },
+        },
+      );
     }
 
     if (path === "/api/create" && method === "POST") {
@@ -386,13 +401,12 @@ export default {
   },
 };
 
-// helper functions
 function getCORSHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
     "Access-Control-Allow-Headers":
-      "Authorization, Content-Type, X-Super-Secret, X-Link-Password",
+      "Authorization, Content-Type, X-Super-Secret, X-Link-Password, X-Timezone",
     "Access-Control-Max-Age": "86400",
   };
 }
