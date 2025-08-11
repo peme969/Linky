@@ -402,3 +402,11 @@ pre {
     background: #41ff41;
     color: #000;
 }
+pre code {
+  display: block;
+  text-align: left;
+  white-space: pre;
+}
+
+/* Keep the copy button above code text */
+.copy-btn { z-index: 1; }
