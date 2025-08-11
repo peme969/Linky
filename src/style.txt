@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Raleway:ital,wght@0,100..900;1,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Cairo+Play:wght@200..1000&display=swap');
 /* Base Variables */
 :root {
   --darkbg: #251D29;
@@ -309,4 +309,12 @@ width: 114%;
 #url-input:focus {
 border-color: var(--dynamic-text);
 outline: none;
+}
+#ban {
+font-family: "Cairo Play", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 747;
+    font-style: normal;
+    font-variation-settings: "slnt" 0;
+    color: #e7a647;
 }
