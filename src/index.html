@@ -21,7 +21,10 @@
         />
         <link rel="manifest" href="./site.webmanifest" />
         <meta name="title" content="Linky! - Peme969’s Link Shortener" />
-        <meta name="description" content="Linky! - Peme969’s Personal Link Shortener" />
+        <meta
+            name="description"
+            content="Linky! - Peme969’s Personal Link Shortener"
+        />
         <meta
             name="keywords"
             content="link, linky, shortener, peme969, cloudflare, cloudflare-workers, link-shortener"
@@ -472,7 +475,7 @@
             <td><a href="${redirectUrl}" target="_blank">${redirectUrl}</a></td>
             <td><a href="${link.url}" target="_blank">${link.url}</a></td>
             <td>${link.passwordProtected ? "Private" : "Public"}</td>
-            <td>${link.password || ""}</td>
+            <td>${link.password || "None"}</td>
             <td>${created}</td>
             <td>${expires}</td>
             <td>${link.clicks || 0}</td>
