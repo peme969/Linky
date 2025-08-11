@@ -183,6 +183,7 @@ describe("Linky worker", () => {
       }),
     );
     await env.URLS.put("SUPER_SECRET_KEY", "topsecret");
+    env.API_KEY = "key";
 
     const req = new Request("http://example.com/api/links", {
       headers: {
@@ -197,6 +198,50 @@ describe("Linky worker", () => {
     expect(Array.isArray(data)).toBe(true);
     const item = data.find((i) => i.slug === slug);
     expect(item.password).toBe(password);
+  });
+
+  it("requires valid API key to create links", async () => {
+    env.API_KEY = "secret";
+    const body = JSON.stringify({ url: "https://example.com" });
+
+    // No Authorization header
+    let req = new Request("http://example.com/api/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+    });
+    let ctx = createExecutionContext();
+    let resp = await worker.fetch(req, env, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(resp.status).toBe(401);
+
+    // Wrong key
+    req = new Request("http://example.com/api/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer wrong",
+      },
+      body,
+    });
+    ctx = createExecutionContext();
+    resp = await worker.fetch(req, env, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(resp.status).toBe(401);
+
+    // Correct key
+    req = new Request("http://example.com/api/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer secret",
+      },
+      body,
+    });
+    ctx = createExecutionContext();
+    resp = await worker.fetch(req, env, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(resp.status).toBe(200);
   });
 });
 
