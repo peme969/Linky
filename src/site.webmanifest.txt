@@ -1,6 +1,6 @@
 {
-"name":"Link Shortener",
-"short_name":"Linky",
+"name":"Linky!",
+"short_name":"Linky!",
 "icons":[
 {"src":"./android-chrome-192x192.png",
 "sizes":"192x192",
