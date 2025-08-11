@@ -1,234 +1,373 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Link Shortener • API Docs</title>
-  <link rel="stylesheet" href="/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <style>
-    :root {
-      --bg: #0f1115;
-      --panel: #151923;
-      --muted: #7b87a2;
-      --text: #e8ecf1;
-      --accent: #3b82f6;
-      --accent-weak: rgba(59,130,246,.15);
-      --border: #293042;
-    }
-    html, body { background: var(--bg); color: var(--text); }
-    body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 1.25rem;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1.25rem;
-    }
-    @media (max-width: 900px) {
-      .layout { grid-template-columns: 1fr; }
-      aside { position: static; top: auto; height: auto; }
-    }
-
-    header.page {
-      max-width: 1200px;
-      margin: 1.25rem auto 0;
-      padding: 0 1.25rem;
-    }
-    header.page h1 {
-      margin: 0;
-      font-size: 1.75rem;
-      letter-spacing: .2px;
-    }
-
-    aside {
-      position: sticky;
-      top: 12px;
-      align-self: start;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1rem;
-    }
-    .toc-title {
-      font-size: .9rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-      margin: 0 0 .5rem 0;
-    }
-    nav.toc ul { list-style: none; padding-left: .5rem; margin: 0; }
-    nav.toc li { margin: .15rem 0; }
-    nav.toc a { display: block; padding: .25rem .4rem; border-radius: 8px; color: var(--text); }
-    nav.toc a:hover { background: var(--accent-weak); }
-    nav.toc a.active { background: var(--accent-weak); border-left: 3px solid var(--accent); padding-left: .35rem; }
-
-    nav.toc ul ul { padding-left: .8rem; opacity: .95; }
-    main#content {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.25rem 1.5rem;
-      min-height: 50vh;
-    }
-
-    /* Markdown content tweaks */
-    main#content h1, main#content h2, main#content h3 {
-      scroll-margin-top: 84px;
-    }
-    main#content pre {
-      background: #0b0e14;
-      border: 1px solid #1c2334;
-      padding: .9rem 1rem;
-      border-radius: 12px;
-      overflow: auto;
-    }
-    main#content code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-    main#content table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-    main#content th, main#content td { border: 1px solid var(--border); padding: .5rem .6rem; text-align: left; }
-    main#content blockquote { border-left: 3px solid var(--border); margin: 0; padding: .25rem .75rem; color: var(--muted); }
-
-    /* Heading anchor link icon */
-    .anchor {
-      visibility: hidden;
-      margin-left: .4rem;
-      font-size: .85rem;
-      color: var(--muted);
-    }
-    h1:hover .anchor, h2:hover .anchor, h3:hover .anchor { visibility: visible; }
-    .anchor:hover { color: var(--accent); text-decoration: none; }
-  </style>
-</head>
-<body>
-  <header class="page">
-    <h1>Link Shortener • API Docs</h1>
-  </header>
-
-  <div class="layout">
-    <aside>
-      <p class="toc-title">On this page</p>
-      <nav class="toc" id="toc"><em>Loading…</em></nav>
-    </aside>
-
-    <main id="content" aria-live="polite">
-      <p>Loading documentation…</p>
-    </main>
-  </div>
-
-  <script>
-    // Fetch and render markdown, then build a mini-TOC with anchor links.
-    (async function () {
-      try {
-        const res = await fetch('/api-docs.md', { cache: 'no-cache' });
-        const md = await res.text();
-
-        // Render markdown
-        const html = window.marked ? marked.parse(md) : md;
-        const content = document.getElementById('content');
-        content.innerHTML = html;
-
-        // Generate ids, anchor links, and TOC entries for h1–h3
-        const headings = Array.from(content.querySelectorAll('h1, h2, h3'));
-        const tocRoot = document.getElementById('toc');
-        const slugCounts = Object.create(null);
-
-        const slugify = (text) => {
-          const base = text.toLowerCase()
-            .replace(/[`~!@#$%^&*()+=\|[\]{};:'",.<>?/]/g, ' ')
-            .replace(/\s+/g, '-')
-            .replace(/^-+|-+$/g, '');
-          const count = (slugCounts[base] = (slugCounts[base] || 0) + 1);
-          return count > 1 ? base + '-' + count : base;
-        };
-
-        const list = document.createElement('ul');
-        let lastLevel = 1;
-        let parents = [list]; // stack of <ul> for nesting
-
-        headings.forEach(h => {
-          const level = Number(h.tagName.substring(1)); // 1,2,3
-          const text = h.textContent.trim();
-          if (!text) return;
-
-          // Ensure stable ID
-          if (!h.id) h.id = slugify(text);
-
-          // Add a small anchor icon/link next to the heading
-          const a = document.createElement('a');
-          a.href = '#' + h.id;
-          a.className = 'anchor';
-          a.setAttribute('aria-label', 'Link to this section');
-          a.textContent = '¶';
-          h.appendChild(a);
-
-          // Build nested TOC (levels 1–3)
-          const li = document.createElement('li');
-          const link = document.createElement('a');
-          link.href = '#' + h.id;
-          link.textContent = text;
-          li.appendChild(link);
-
-          // Adjust nesting based on level
-          const safeLevel = Math.min(Math.max(level, 1), 3);
-          if (safeLevel > lastLevel) {
-            // create a new sublist
-            const sub = document.createElement('ul');
-            parents[parents.length - 1].lastElementChild?.appendChild(sub);
-            parents.push(sub);
-          } else if (safeLevel < lastLevel) {
-            // climb up
-            while (parents.length > 1 && (lastLevel - 1) >= safeLevel) {
-              parents.pop();
-              lastLevel--;
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Link Shortener • API Docs</title>
+        <link rel="stylesheet" href="/style.css" />
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <style>
+            :root {
+                --bg: #0f1115;
+                --panel: #151923;
+                --muted: #7b87a2;
+                --text: #e8ecf1;
+                --accent: #3b82f6;
+                --accent-weak: rgba(59, 130, 246, 0.15);
+                --border: #293042;
+                --sticky-offset: 84px; /* keep in sync with header height */
             }
-          }
-          parents[parents.length - 1].appendChild(li);
-          lastLevel = safeLevel;
-        });
-
-        tocRoot.innerHTML = '';
-        tocRoot.appendChild(list);
-
-        // Smooth scrolling
-        document.querySelectorAll('nav.toc a, .anchor').forEach(a => {
-          a.addEventListener('click', (e) => {
-            if (a.hash && document.querySelector(a.hash)) {
-              e.preventDefault();
-              const target = document.querySelector(a.hash);
-              history.pushState(null, '', a.hash);
-              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            html,
+            body {
+                background: var(--bg);
+                color: var(--text);
             }
-          });
-        });
-
-        // Active section highlight
-        const navLinks = Array.from(document.querySelectorAll('nav.toc a'));
-        const map = new Map(navLinks.map(a => [a.getAttribute('href'), a]));
-
-        const io = new IntersectionObserver(entries => {
-          entries.forEach(entry => {
-            const id = '#' + entry.target.id;
-            const link = map.get(id);
-            if (!link) return;
-            if (entry.isIntersecting) {
-              navLinks.forEach(l => l.classList.remove('active'));
-              link.classList.add('active');
+            body {
+                margin: 0;
+                font-family:
+                    ui-sans-serif,
+                    system-ui,
+                    -apple-system,
+                    Segoe UI,
+                    Roboto,
+                    Ubuntu,
+                    Cantarell,
+                    Noto Sans,
+                    Helvetica,
+                    Arial,
+                    "Apple Color Emoji",
+                    "Segoe UI Emoji";
             }
-          });
-        }, { rootMargin: '-40% 0px -55% 0px', threshold: [0, 1] });
+            a {
+                color: var(--accent);
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
 
-        headings.forEach(h => io.observe(h));
+            header.page {
+                max-width: 1200px;
+                margin: 1.25rem auto 0;
+                padding: 0 1.25rem;
+            }
+            header.page h1 {
+                margin: 0;
+                font-size: 1.75rem;
+                letter-spacing: 0.2px;
+            }
 
-      } catch (e) {
-        document.getElementById('content').innerHTML = '<p>Failed to load documentation.</p>';
-        document.getElementById('toc').innerHTML = '<em>—</em>';
-        console.error(e);
-      }
-    })();
-  </script>
-</body>
+            .layout {
+                display: grid;
+                grid-template-columns: 280px 1fr;
+                gap: 1.25rem;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 1.25rem;
+            }
+            @media (max-width: 900px) {
+                .layout {
+                    grid-template-columns: 1fr;
+                }
+                aside {
+                    position: static;
+                    top: auto;
+                    height: auto;
+                }
+            }
+
+            aside {
+                position: sticky;
+                top: 12px;
+                align-self: start;
+                background: var(--panel);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 1rem;
+            }
+            .toc-title {
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: var(--muted);
+                margin: 0 0 0.5rem 0;
+            }
+            nav.toc ul {
+                list-style: none;
+                padding-left: 0.5rem;
+                margin: 0;
+            }
+            nav.toc li {
+                margin: 0.15rem 0;
+            }
+            nav.toc a {
+                display: block;
+                padding: 0.25rem 0.4rem;
+                border-radius: 8px;
+                color: var(--text);
+            }
+            nav.toc a:hover {
+                background: var(--accent-weak);
+            }
+            nav.toc a.active {
+                background: var(--accent-weak);
+                border-left: 3px solid var(--accent);
+                padding-left: 0.35rem;
+            }
+            nav.toc ul ul {
+                padding-left: 0.8rem;
+                opacity: 0.95;
+            }
+
+            main#content {
+                background: var(--panel);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 1.25rem 1.5rem;
+                min-height: 50vh;
+            }
+
+            /* Markdown tweaks */
+            main#content h1,
+            main#content h2,
+            main#content h3 {
+                scroll-margin-top: var(--sticky-offset);
+                margin-top: 2rem;
+            }
+            main#content h1:first-child,
+            main#content h2:first-child,
+            main#content h3:first-child {
+                margin-top: 0;
+            }
+            main#content pre {
+                background: #0b0e14;
+                border: 1px solid #1c2334;
+                padding: 0.9rem 1rem;
+                border-radius: 12px;
+                overflow: auto;
+            }
+            main#content code {
+                font-family:
+                    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+                    "Liberation Mono", "Courier New", monospace;
+            }
+            main#content table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 1rem 0;
+            }
+            main#content th,
+            main#content td {
+                border: 1px solid var(--border);
+                padding: 0.5rem 0.6rem;
+                text-align: left;
+                vertical-align: top;
+            }
+            main#content blockquote {
+                border-left: 3px solid var(--border);
+                margin: 0;
+                padding: 0.25rem 0.75rem;
+                color: var(--muted);
+            }
+            main#content ul,
+            main#content ol {
+                padding-left: 1.2rem;
+            }
+            main#content hr {
+                border: 0;
+                border-top: 1px solid var(--border);
+                margin: 1.25rem 0;
+            }
+
+            /* Heading anchor icon */
+            .anchor {
+                visibility: hidden;
+                margin-left: 0.4rem;
+                font-size: 0.85rem;
+                color: var(--muted);
+            }
+            h1:hover .anchor,
+            h2:hover .anchor,
+            h3:hover .anchor {
+                visibility: visible;
+            }
+            .anchor:hover {
+                color: var(--accent);
+                text-decoration: none;
+            }
+        </style>
+    </head>
+    <body>
+        <header class="page">
+            <h1>Link Shortener • API Docs</h1>
+        </header>
+
+        <div class="layout">
+            <aside>
+                <p class="toc-title">On this page</p>
+                <nav class="toc" id="toc"><em>Loading…</em></nav>
+            </aside>
+
+            <main id="content" aria-live="polite">
+                <p>Loading documentation…</p>
+            </main>
+        </div>
+
+        <script>
+            // Configure marked for nicer Markdown
+            if (window.marked) {
+                marked.setOptions({
+                    gfm: true,
+                    breaks: true,
+                    smartypants: true,
+                });
+            }
+
+            (async function () {
+                try {
+                    // Load your Markdown source
+                    const res = await fetch("/api-docs.md", {
+                        cache: "no-cache",
+                    });
+                    const md = (await res.ok) ? res.text() : "";
+                    const text = await md;
+
+                    // Render Markdown to HTML
+                    const content = document.getElementById("content");
+                    const html = window.marked ? marked.parse(text) : text;
+                    content.innerHTML = html;
+
+                    // Collect headings (h1–h3), ensure unique IDs, add copy-link anchors, and build TOC
+                    const headings = Array.from(
+                        content.querySelectorAll("h1, h2, h3"),
+                    );
+                    const tocRoot = document.getElementById("toc");
+                    const slugCounts = Object.create(null);
+
+                    const slugify = (s) => {
+                        const base = s
+                            .toLowerCase()
+                            .replace(/[`~!@#$%^&*()+=|[\]{};:'",.<>?/]/g, " ")
+                            .replace(/\s+/g, "-")
+                            .replace(/^-+|-+$/g, "");
+                        const n = (slugCounts[base] =
+                            (slugCounts[base] || 0) + 1);
+                        return n > 1 ? `${base}-${n}` : base;
+                    };
+
+                    const list = document.createElement("ul");
+                    let lastLevel = 1;
+                    const stacks = [list];
+
+                    headings.forEach((h) => {
+                        const level = Math.min(
+                            Math.max(Number(h.tagName.slice(1)), 1),
+                            3,
+                        );
+                        const text = h.textContent.trim();
+                        if (!text) return;
+
+                        if (!h.id) h.id = slugify(text);
+
+                        // Add ¶ anchor
+                        const a = document.createElement("a");
+                        a.href = `#${h.id}`;
+                        a.className = "anchor";
+                        a.setAttribute("aria-label", "Link to this section");
+                        a.textContent = "¶";
+                        h.appendChild(a);
+
+                        // TOC entry
+                        const li = document.createElement("li");
+                        const link = document.createElement("a");
+                        link.href = `#${h.id}`;
+                        link.textContent = text;
+                        li.appendChild(link);
+
+                        // Maintain nesting
+                        if (level > lastLevel) {
+                            const sub = document.createElement("ul");
+                            stacks[
+                                stacks.length - 1
+                            ].lastElementChild?.appendChild(sub);
+                            stacks.push(sub);
+                        } else if (level < lastLevel) {
+                            while (stacks.length > 1 && lastLevel > level) {
+                                stacks.pop();
+                                lastLevel--;
+                            }
+                        }
+                        stacks[stacks.length - 1].appendChild(li);
+                        lastLevel = level;
+                    });
+
+                    tocRoot.innerHTML = "";
+                    tocRoot.appendChild(list);
+
+                    // Smooth scroll that respects CSS scroll-margin-top
+                    document
+                        .querySelectorAll("nav.toc a, .anchor")
+                        .forEach((a) => {
+                            a.addEventListener("click", (e) => {
+                                const hash = a.getAttribute("href");
+                                if (hash && hash.startsWith("#")) {
+                                    const target = document.querySelector(hash);
+                                    if (target) {
+                                        e.preventDefault();
+                                        history.pushState(null, "", hash);
+                                        target.scrollIntoView({
+                                            behavior: "smooth",
+                                            block: "start",
+                                        });
+                                    }
+                                }
+                            });
+                        });
+
+                    // Active section highlight — tuned so it won’t “skip” to the next one
+                    const navLinks = Array.from(
+                        document.querySelectorAll("nav.toc a"),
+                    );
+                    const linkMap = new Map(
+                        navLinks.map((x) => [x.getAttribute("href"), x]),
+                    );
+
+                    const io = new IntersectionObserver(
+                        (entries) => {
+                            // find the entry nearest to the top that is intersecting
+                            const visible = entries
+                                .filter((en) => en.isIntersecting)
+                                .sort(
+                                    (a, b) =>
+                                        Math.abs(a.boundingClientRect.top) -
+                                        Math.abs(b.boundingClientRect.top),
+                                );
+                            if (visible[0]) {
+                                const id = "#" + visible[0].target.id;
+                                navLinks.forEach((l) =>
+                                    l.classList.toggle(
+                                        "active",
+                                        l.getAttribute("href") === id,
+                                    ),
+                                );
+                            }
+                        },
+                        {
+                            // Top 40% of the viewport marks a section "active"
+                            root: null,
+                            rootMargin: `-${parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sticky-offset")) + 10}px 0px -60% 0px`,
+                            threshold: [0.01, 1.0],
+                        },
+                    );
+
+                    headings.forEach((h) => io.observe(h));
+                } catch (err) {
+                    document.getElementById("content").innerHTML =
+                        "<p>Failed to load documentation.</p>";
+                    document.getElementById("toc").innerHTML = "<em>—</em>";
+                    console.error(err);
+                }
+            })();
+        </script>
+    </body>
 </html>
