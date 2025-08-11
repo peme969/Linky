@@ -317,4 +317,5 @@ font-family: "Cairo Play", sans-serif;
     font-style: normal;
     font-variation-settings: "slnt" 0;
     color: #e7a647;
+    font-size: 40px;
 }
