@@ -1,6 +1,7 @@
 import html from "./index.html";
 import docsHtml from "./docs.html";
 import styleCss from "./style.txt";
+import apiDocs from "./api-docs.txt";
 import { DateTime } from "luxon";
 import runJS from "./run.js";
 import siteWebmanifest from "./site.webmanifest.txt";
@@ -104,6 +105,12 @@ export default {
       return new Response(appleicon, {
         status: 200,
         headers: { "Content-Type": "image/png", ...cors },
+      });
+    }
+    if (path === "/api-docs.md") {
+      return new Response(apiDocs, {
+        status: 200,
+        headers: { "Content-Type": "text/markdown", ...cors },
       });
     }
     if (path === "/")
@@ -259,9 +266,10 @@ export default {
             url: data.url,
             clicks: data.clicks || 0,
             passwordProtected: !!data.metadata.passwordProtected,
-            ...(isSuper && data.metadata.passwordProtected && {
-              password: data.password,
-            }),
+            ...(isSuper &&
+              data.metadata.passwordProtected && {
+                password: data.password,
+              }),
             metadata: {
               createdAt: data.metadata.formattedCreated,
               formattedExpiration: data.metadata.formattedExpiration,
