@@ -1,7 +1,7 @@
 
 # Link Shortener API Documentation
 
-A serverless link shortener API with expiration, password protection, and authentication, powered by Workers KV.
+A serverless link shortener API with expiration, password protection, and authentication, powered by Workers KV. Passwords may be viewed only by super users who provide the correct admin secret.
 
 ## 🌐 Base URL
 
@@ -56,23 +56,27 @@ Shorten a new URL.
 }
 ```
 
+Passwords can be viewed only when the `X-Super-Secret` header matches the super admin key.
+
 ---
 
 ### `GET /api/links`
 
-List **all** valid (non-expired) shortened URLs—public and password-protected alike.
+List **all** valid (non-expired) shortened URLs.
 
 **Headers:**
 
 - `Authorization: Bearer <API_KEY>`
+- `X-Super-Secret: <ADMIN_KEY>` – Optional; include to also return private links and their passwords.
 
-**Response:**
+**Response (with super secret):**
 
 ```json
 [
   {
     "slug": "exmpl",
     "url": "https://example.com",
+    "password": null,
     "metadata": {
       "createdAt": "July 30, 2025, 09:00 AM CDT",
       "expirationInSeconds": 3600,
@@ -83,6 +87,7 @@ List **all** valid (non-expired) shortened URLs—public and password-protected 
   {
     "slug": "privatelink",
     "url": "https://private.example.com",
+    "password": "secret",
     "metadata": {
       "createdAt": "July 30, 2025, 08:00 AM CDT",
       "expirationInSeconds": 7200,
